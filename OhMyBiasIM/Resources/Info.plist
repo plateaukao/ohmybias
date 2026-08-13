@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>zh-Hant</string>
+    <key>CFBundleDisplayName</key>
+    <string>OhMyBias</string>
+    <key>CFBundleExecutable</key>
+    <string>OhMyBiasIM</string>
+    <key>CFBundleIconFile</key>
+    <string>icon.icns</string>
+    <key>CFBundleIdentifier</key>
+    <string>info.plateaukao.ohmybias</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>OhMyBias</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.3.55</string>
+    <key>CFBundleVersion</key>
+    <string>0.3.55</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSPrincipalClass</key>
+    <string>OhMyBiasIM.NSManualApplication</string>
+    <key>InputMethodConnectionName</key>
+    <string>info.plateaukao.ohmybias_Connection</string>
+    <key>InputMethodServerControllerClass</key>
+    <string>OhMyBiasIM.OhMyBiasInputController</string>
+    <key>tsInputMethodCharacterRepertoireKey</key>
+    <array>
+        <string>zh-Hant</string>
+    </array>
+    <key>TISIntendedLanguage</key>
+    <string>zh-Hant</string>
+    <key>tsInputMethodKeyboardLayoutOverrideKey</key>
+    <string>com.apple.keylayout.ABC</string>
+    <key>tsInputMethodIconFileKey</key>
+    <string>menu_icon.pdf</string>
+    <!-- macOS 26 起選單圖示走 input mode 的 icon key（模板自動反轉）；
+         無 mode 的輸入法會改用 app icon（彩色、不反轉）。比照 Squirrel／Apple 內建輸入法宣告單一 mode。 -->
+    <key>ComponentInputModeDict</key>
+    <dict>
+        <key>tsInputModeListKey</key>
+        <dict>
+            <!-- 比照 Squirrel：mode key＝bundle id，TISInputSourceID 另外宣告 -->
+            <key>info.plateaukao.ohmybias</key>
+            <dict>
+                <key>TISInputSourceID</key>
+                <string>info.plateaukao.ohmybias.OhMyBias</string>
+                <key>TISIntendedLanguage</key>
+                <string>zh-Hant</string>
+                <key>tsInputModeCharacterRepertoireKey</key>
+                <array>
+                    <string>zh-Hant</string>
+                </array>
+                <key>tsInputModeDefaultStateKey</key>
+                <true/>
+                <key>tsInputModeIsVisibleKey</key>
+                <true/>
+                <key>tsInputModeMenuIconFileKey</key>
+                <string>menu_icon.pdf</string>
+                <key>tsInputModeAlternateMenuIconFileKey</key>
+                <string>menu_icon.pdf</string>
+                <key>tsInputModePaletteIconFileKey</key>
+                <string>menu_icon.pdf</string>
+                <key>tsInputModePrimaryInScriptKey</key>
+                <true/>
+                <key>tsInputModeScriptKey</key>
+                <string>smUnicodeScript</string>
+            </dict>
+        </dict>
+        <key>tsVisibleInputModeOrderedArrayKey</key>
+        <array>
+            <string>info.plateaukao.ohmybias.OhMyBias</string>
+        </array>
+    </dict>
+</dict>
+</plist>

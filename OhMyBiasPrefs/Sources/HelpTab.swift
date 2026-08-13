@@ -1,0 +1,204 @@
+import SwiftUI
+
+struct HelpTab: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+
+                // ── 使用方法 ──
+
+                Label("使用方法", systemImage: "book").font(Typo.h1)
+
+                guide("匯入字表", icon: "doc.badge.arrow.up", steps: [
+                    "首次使用時，系統會引導匯入 liu.cin 字表",
+                    "也可從設定程式 →「輸入」→「匯入字表⋯」手動匯入",
+                    "字表在裝置上編譯為 .bin，不上傳、不外流",
+                    "支援 .cin（主表）和 .txt（擴充表）",
+                ])
+
+                guide("基本打字", icon: "character.cursor.ibeam", steps: [
+                    "輸入嘸蝦米碼，按空白鍵送字",
+                    "候選字多於一個時，按 1–9 數字鍵選字",
+                    "按 v / r / s / f 快速選第 2–5 候選字",
+                    "按 * (Shift+8) 當萬用碼，不確定的碼用 * 代替",
+                    "按 Enter 直接送出原始碼文字",
+                    "按 / 空閒時直接送出（適合 slash command）",
+                    "Tab / 方向鍵翻頁選字",
+                ])
+
+                guide("同音字查詢", icon: "character.phonetic", steps: [
+                    "打 ,,TO + Space 進入同音字模式",
+                    "進入後每次送字都會列出該字的同音字",
+                    "再打 ,,TO + Space 退出同音字模式",
+                ])
+
+                guide("注音反查與拼音查碼", icon: "textformat.abc", steps: [
+                    "打 ,,ZH + Space → 切換注音反查（打注音看嘸蝦米碼）",
+                    "再打 ,,ZH + Space 切回嘸蝦米",
+                    "打 ,,PYS + Space → 拼音查碼（簡體）",
+                    "打 ,,PYT + Space → 拼音查碼（繁體）",
+                    "拼音模式：輸入拼音字母，按 1–5 選聲調（Space = 一聲）",
+                ])
+
+                guide("中英文切換", icon: "globe", steps: [
+                    "單擊 Shift → 切換中／英文",
+                    "按住 Shift → 暫時英文，放開回中文",
+                    "Shift + Space → 全形空白",
+                    ",, + Space → 全形空白（另一種方式）",
+                ])
+
+                guide("擴充表", icon: "doc.text", steps: [
+                    "擴充表放在 ~/Library/Application Support/OhMyBias/tables/",
+                    "格式：編碼<Tab>內容，一行一筆（# 開頭為註解）",
+                    "修改後打 ,,RL + Space 即時重載",
+                ])
+
+                guide("固定同碼字排序", icon: "pin.fill", steps: [
+                    "打 ,,PIN + Space 進入固定排序模式",
+                    "輸入碼（如 hj），候選字列表出現",
+                    "按數字鍵依序選擇要固定的字（如先選「手」再選「乎」）",
+                    "按 Space 確認，該碼的候選順序即固定",
+                    "打 ,,UNPINx + Space 解除（x 為碼，如 ,,UNPINhj）",
+                    "也可在設定程式 →「輸入」→「固定同碼字排序」中操作",
+                ])
+
+                Divider()
+
+                // ── 快捷鍵速查 ──
+
+                Label("快捷鍵速查", systemImage: "command").font(Typo.h1)
+
+                section("基本操作", icon: "keyboard", items: [
+                    ("空白鍵", "送字"),
+                    ("1–9, 0", "選字"),
+                    ("* (星號)", "萬用碼"),
+                    ("v / r / s / f", "補碼（第 2–5 候選字）"),
+                    ("' ; /", "直送（不攔截，方便寫程式）"),
+                    ("Tab / ← →", "翻頁選字"),
+                ])
+
+                section("切換", icon: "arrow.left.arrow.right", items: [
+                    ("Shift 單擊", "中／英文切換"),
+                    ("Shift 按住", "暫時英文模式"),
+                    ("Shift + Space", "全形空白"),
+                ])
+
+                section("命令模式（,, 開頭）", icon: "command", items: [
+                    (",,T", "繁體中文（預設）"),
+                    (",,S", "簡體中文"),
+                    (",,J", "日文假名"),
+                    (",,SP", "速打（僅最短碼）"),
+                    (",,SL", "慢打（僅最長碼）"),
+                    (",,TS", "繁→簡轉換"),
+                    (",,ST", "簡→繁轉換"),
+                    (",,ZH", "注音查碼"),
+                    (",,PYT", "拼音查碼（繁體）"),
+                    (",,PYS", "拼音查碼（簡體）"),
+                    (",,TO", "同音字查詢模式"),
+                    (",,RS", "重置字頻統計"),
+                    (",,RL", "重載字表＋擴充表"),
+                    (",,PIN", "固定同碼字排序"),
+                    (",,UNPINx", "解除碼 x 的固定排序"),
+                    (",,C", "顯示當前模式"),
+                    (",,H", "命令說明"),
+                ])
+
+                section("擴充表", icon: "doc.text", items: [
+                    ("路徑", "~/Library/Application Support/OhMyBias/tables/*.txt"),
+                    ("格式", "編碼<Tab>內容，一行一筆"),
+                    ("重載", "修改後打 ,,RL 即時生效"),
+                ])
+
+                section("資料路徑", icon: "folder", items: [
+                    ("liu.cin", "嘸蝦米字表"),
+                    ("freq.db", "字頻學習資料"),
+                    ("tables/", "擴充表資料夾"),
+                    ("debug.log", "Debug 日誌（開啟時）"),
+                ])
+
+                HStack {
+                    Spacer()
+                    Text("所有資料存放於 ~/Library/Application Support/OhMyBias/")
+                        .font(Typo.caption).foregroundStyle(.tertiary)
+                    Spacer()
+                }
+
+                Divider()
+
+                // ── 語料來源與授權 ──
+
+                Label("語料來源與授權", systemImage: "doc.text").font(Typo.h1)
+
+                creditSection("核心資料", items: [
+                    ("注音對照表", "威注音 VanguardLexicon", "MIT"),
+                    ("繁簡對照表", "OpenCC", "Apache 2.0"),
+                    ("萌典字頻", "萌典（教育部辭典）", "CC0"),
+                ])
+
+                Text("本程式碼以 MIT 授權釋出。各語料依其原始授權條款使用。")
+                    .font(Typo.caption).foregroundStyle(.secondary)
+
+                HStack(spacing: 4) {
+                    Text("原始碼：").font(Typo.caption).foregroundStyle(.secondary)
+                    Link("github.com/plateaukao/ohmybias",
+                         destination: URL(string: "https://github.com/plateaukao/ohmybias")!)
+                        .font(Typo.caption)
+                }
+            }
+            .padding(20)
+        }
+    }
+
+    // MARK: - Guide (numbered steps)
+
+    @ViewBuilder
+    private func guide(_ title: String, icon: String, steps: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(title, systemImage: icon).font(Typo.h2)
+            ForEach(Array(steps.enumerated()), id: \.offset) { i, step in
+                HStack(alignment: .top, spacing: 8) {
+                    Text("\(i + 1).")
+                        .font(Typo.bodyMono)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 20, alignment: .trailing)
+                    Text(step).font(Typo.body)
+                }
+            }
+        }
+    }
+
+    // MARK: - Section (key-value table)
+
+    @ViewBuilder
+    private func section(_ title: String, icon: String, items: [(String, String)]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(title, systemImage: icon).font(Typo.h2)
+            ForEach(items, id: \.0) { key, desc in
+                HStack(alignment: .top, spacing: 0) {
+                    Text(key)
+                        .font(Typo.bodyMono)
+                        .frame(width: 160, alignment: .leading)
+                    Text(desc)
+                        .font(Typo.body)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    // MARK: - Credit section (name / source / license)
+
+    @ViewBuilder
+    private func creditSection(_ title: String, items: [(String, String, String)]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title).font(Typo.h3).foregroundStyle(.secondary)
+            ForEach(items, id: \.0) { name, source, license in
+                HStack(alignment: .top, spacing: 0) {
+                    Text(name).font(Typo.bodyMono).frame(width: 140, alignment: .leading)
+                    Text(source).font(Typo.body).frame(width: 220, alignment: .leading)
+                    Text(license).font(Typo.cardDesc).foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+}

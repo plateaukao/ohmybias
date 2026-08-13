@@ -1,0 +1,4 @@
+/* 輸入法選單顯示名稱：input mode 的名稱以 mode key 查表（比照 Squirrel） */
+"info.plateaukao.ohmybias" = "OhMyBias";
+"CFBundleName" = "OhMyBias";
+"CFBundleDisplayName" = "OhMyBias";

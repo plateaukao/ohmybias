@@ -1,0 +1,5 @@
+{
+  "ss": { "type": "shell", "run": "~/Library/Application\\ Support/OhMyBias/ohmybias_capture.sh screen" },
+  "ws": { "type": "shell", "run": "~/Library/Application\\ Support/OhMyBias/ohmybias_capture.sh window" },
+  "cs": { "type": "shell", "run": "~/Library/Application\\ Support/OhMyBias/ohmybias_capture.sh select" }
+}

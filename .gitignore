@@ -1,0 +1,10 @@
+.DS_Store
+build/
+OhMyBiasIM/build/
+OhMyBiasPrefs/build/
+liu.cin
+*.bak
+__pycache__/
+.claude/
+/OhMyBiasIM.zip
+/OhMyBiasPrefs.zip
