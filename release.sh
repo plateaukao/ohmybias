@@ -39,7 +39,15 @@ codesign --verify --deep --strict "$IM_APP"
 echo "==> Step 3/5: 打包 pkg..."
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
-pkgbuild --component "$IM_APP" \
+# 不用 --component：它預設 BundleIsRelocatable=true，安裝時 Installer 會把 payload
+# 「搬」去蓋機器上任何同 bundle id 的 app（開發機的 build/ 副本首當其衝），
+# /Library/Input Methods 反而裝不進去。改 --root＋component plist 關掉 relocation。
+mkdir "$TMP/root"
+ditto "$IM_APP" "$TMP/root/OhMyBiasIM.app"
+pkgbuild --analyze --root "$TMP/root" "$TMP/component.plist"
+/usr/libexec/PlistBuddy -c 'Set :0:BundleIsRelocatable false' "$TMP/component.plist"
+pkgbuild --root "$TMP/root" \
+    --component-plist "$TMP/component.plist" \
     --install-location "/Library/Input Methods" \
     --scripts "$ROOT/pkg/scripts" \
     --identifier info.plateaukao.ohmybias.pkg \

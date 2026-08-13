@@ -7,7 +7,18 @@
 ### 變更
 - **合併為單一 app** — 設定視窗內建於 OhMyBiasIM.app（輸入法選單 →「偏好設定⋯」），移除獨立的 OhMyBiasPrefs.app。
 - **pkg 安裝** — `release.sh` 改產出已簽章＋公證的 `OhMyBias-x.y.z.pkg`：雙擊安裝、自動註冊輸入法、結尾建議登出再登入（可稍後）。移除 install.sh。
+- **安裝結尾不再只有「登出」按鈕** — 移除 `onConclusion="RequireLogout"`（它讓結尾只剩強制登出、無法稍後再說），改回一般「關閉」；postinstall 已註冊輸入法，多數情況不登出即可加入，清單沒出現再登出即可。
+
+### 變更（顯示名稱）
+- **輸入來源顯示名稱改為「無米蝦」** — 系統設定輸入來源清單、輸入法選單皆顯示「無米蝦」；灰色副標（app 名稱）維持 OhMyBias，不再上下兩行重複同名。副標為系統設定對第三方輸入法的固定標示（Squirrel 亦同），宣告 input mode 時無法移除。
+
+### 修正
+- **輸入法完全不出現在系統設定** — bundle id 改為 `info.plateaukao.inputmethod.ohmybias`：macOS TIS 只註冊 bundle id 含 `inputmethod` 子字串的輸入法（`TISRegisterInputSource` 對不合規的 app 回報成功但實際不註冊），原 id `info.plateaukao.ohmybias` 因此在「繁體中文」輸入方式清單完全找不到。
+- **pkg 裝不進 `/Library/Input Methods`** — `pkgbuild --component` 預設允許 bundle relocation：機器上若已註冊同 bundle id 的 app（如開發機 `build/` 裡的副本），Installer 會把 payload 搬去蓋那份，輸入法清單自然找不到。改用 `--root`＋component plist 將 `BundleIsRelocatable` 設為 false。
 - 使用者資料夾（capture script、commands.json）改由 app 首次啟動時自動部署。
+- **每次切換視窗都跳出模式提示** — 輸入來源觀察者仍比對舊 bundle id 子字串 `plateaukao.ohmybias`，改名為 `info.plateaukao.inputmethod.ohmybias` 後永遠比不到，每次視窗切換都被誤判為「從其他輸入法切回」而重播切入提示；改比對 `inputmethod.ohmybias`。切入提示本身可在 偏好設定 → 外觀 → 「切入提示」關閉。
+- **游標選字窗寬度不會隨候選字縮小**（移植自 Yabomish `fix/cursor-panel-stale-width`）— 隱藏中的固定模式標籤殘留 Auto Layout constraint 與舊文字，把視窗寬度撐在舊尺寸；改為切換佈局時停用／啟用該組 constraint，選字窗寬度隨候選字數自動縮放。
+- **直向選字窗貼齊內容寬** — 移除 80pt 最小寬度下限，候選字少（如兩字一行）時不再留一大截空白。
 
 ## [0.1.0] — 2026-08-14
 

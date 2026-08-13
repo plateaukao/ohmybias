@@ -15,6 +15,7 @@
     <choice id="info.plateaukao.ohmybias.pkg" visible="false">
         <pkg-ref id="info.plateaukao.ohmybias.pkg"/>
     </choice>
-    <!-- RequireLogout：安裝結尾顯示「登出」按鈕；使用者也可先結束安裝程式、稍後再登出 -->
-    <pkg-ref id="info.plateaukao.ohmybias.pkg" onConclusion="RequireLogout">OhMyBiasIM-component.pkg</pkg-ref>
+    <!-- 不設 onConclusion：RequireLogout 會讓結尾只剩「登出」一顆按鈕、無法稍後再說。
+         postinstall 已跑 imklaunchagent 註冊，多數情況不登出即可用；登出僅作為 conclusion 頁的建議。 -->
+    <pkg-ref id="info.plateaukao.ohmybias.pkg">OhMyBiasIM-component.pkg</pkg-ref>
 </installer-gui-script>

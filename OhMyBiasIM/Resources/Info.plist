@@ -11,7 +11,8 @@
     <key>CFBundleIconFile</key>
     <string>icon.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>info.plateaukao.ohmybias</string>
+    <!-- bundle id 必須含 "inputmethod" 子字串，否則 TIS 完全不註冊（系統設定看不到）。 -->
+    <string>info.plateaukao.inputmethod.ohmybias</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
@@ -27,7 +28,7 @@
     <key>NSPrincipalClass</key>
     <string>OhMyBiasIM.NSManualApplication</string>
     <key>InputMethodConnectionName</key>
-    <string>info.plateaukao.ohmybias_Connection</string>
+    <string>info.plateaukao.inputmethod.ohmybias_Connection</string>
     <key>InputMethodServerControllerClass</key>
     <string>OhMyBiasIM.OhMyBiasInputController</string>
     <key>tsInputMethodCharacterRepertoireKey</key>
@@ -47,10 +48,10 @@
         <key>tsInputModeListKey</key>
         <dict>
             <!-- 比照 Squirrel：mode key＝bundle id，TISInputSourceID 另外宣告 -->
-            <key>info.plateaukao.ohmybias</key>
+            <key>info.plateaukao.inputmethod.ohmybias</key>
             <dict>
                 <key>TISInputSourceID</key>
-                <string>info.plateaukao.ohmybias.OhMyBias</string>
+                <string>info.plateaukao.inputmethod.ohmybias.OhMyBias</string>
                 <key>TISIntendedLanguage</key>
                 <string>zh-Hant</string>
                 <key>tsInputModeCharacterRepertoireKey</key>
@@ -75,7 +76,7 @@
         </dict>
         <key>tsVisibleInputModeOrderedArrayKey</key>
         <array>
-            <string>info.plateaukao.ohmybias.OhMyBias</string>
+            <string>info.plateaukao.inputmethod.ohmybias.OhMyBias</string>
         </array>
     </dict>
 </dict>

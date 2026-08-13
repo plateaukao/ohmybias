@@ -20,7 +20,7 @@ IM_BUILD="$ROOT/OhMyBiasIM/build"
 IM_APP="$IM_BUILD/OhMyBiasIM.app"
 INSTALL_DIR="/Library/Input Methods"
 USER_DIR="$HOME/Library/Application Support/OhMyBias"
-IM_BUNDLE_ID="info.plateaukao.ohmybias"
+IM_BUNDLE_ID="info.plateaukao.inputmethod.ohmybias"
 
 check_xcode() {
     if ! xcode-select -p &>/dev/null; then

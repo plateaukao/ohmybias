@@ -77,7 +77,9 @@ class OhMyBiasInputController: IMKInputController {
             let src = TISCopyCurrentKeyboardInputSource()?.takeRetainedValue()
             let id = src.flatMap { TISGetInputSourceProperty($0, kTISPropertyInputSourceID) }
                 .map { Unmanaged<CFString>.fromOpaque($0).takeUnretainedValue() as String }
-            if id?.contains("plateaukao.ohmybias") != true {
+            // bundle id 含 inputmethod 子字串（TIS 註冊要求）— 比對新 id，
+            // 舊字串 "plateaukao.ohmybias" 比不到會把每次視窗切換都當成換輸入法
+            if id?.contains("inputmethod.ohmybias") != true {
                 ohMyBiasWasActive = false
             }
         }
