@@ -5,6 +5,8 @@
 ## [0.2.0] — 2026-08-14
 
 ### 變更
+- **候選字排序改為「字表順序＋`,,PIN` 固定排序」** — 打字路徑不再查詢／記錄字頻：原本每個按鍵最多兩次同步 SQLite 查詢（跨執行緒），且每 500 字觸發的字頻衰減（全表 UPDATE＋DELETE）會讓當下那一鍵卡住。現在排序是純記憶體操作：有 `,,PIN` 的碼把固定字排前，其餘一律維持字表順序。`freq.db` 舊字頻資料與 `,,RS` 保留，但不再參與排序。
+- **FreqTracker 改為全域共用** — IMK 每個 client app 各建一個 controller，原本每個都另開自己的 SQLite 連線與 pinned 快取（且 deactivate 時 flush 到的是沒人寫入的那份）；改共用單一實例後 `,,PIN` 立即跨 app 生效。
 - **合併為單一 app** — 設定視窗內建於 OhMyBiasIM.app（輸入法選單 →「偏好設定⋯」），移除獨立的 OhMyBiasPrefs.app。
 - **pkg 安裝** — `release.sh` 改產出已簽章＋公證的 `OhMyBias-x.y.z.pkg`：雙擊安裝、自動註冊輸入法、結尾建議登出再登入（可稍後）。移除 install.sh。
 - **安裝結尾不再只有「登出」按鈕** — 移除 `onConclusion="RequireLogout"`（它讓結尾只剩強制登出、無法稍後再說），改回一般「關閉」；postinstall 已註冊輸入法，多數情況不登出即可加入，清單沒出現再登出即可。

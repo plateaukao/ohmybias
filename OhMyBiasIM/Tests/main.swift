@@ -269,14 +269,36 @@ func testRankerModeFiltering() {
     let ranker = CandidateRanker()
 
     // mode .t — no filtering, returns both
-    let tResult = ranker.rank(raw: ["好", "號"], code: "a", prev: "", mode: .t, cinTable: table, freqTracker: tracker)
+    let tResult = ranker.rank(raw: ["好", "號"], code: "a", mode: .t, cinTable: table, freqTracker: tracker)
     check(tResult.contains("好"), "mode .t keeps 好")
     check(tResult.contains("號"), "mode .t keeps 號")
 
     // mode .sp — only chars whose shortest code == "a"
-    let spResult = ranker.rank(raw: ["好", "號"], code: "a", prev: "", mode: .sp, cinTable: table, freqTracker: tracker)
+    let spResult = ranker.rank(raw: ["好", "號"], code: "a", mode: .sp, cinTable: table, freqTracker: tracker)
     // Both 好 and 號 have shortest code "a" (1 char), so both should remain
     check(spResult.contains("好") || spResult.contains("號"), "mode .sp keeps chars with shortest code 'a'")
+}
+
+func testRankerPinnedOrderOnly() {
+    let table = loadTestCINTable()
+    let tracker = FreqTracker()
+    let ranker = CandidateRanker()
+    let code = "_test_pin_\(UUID().uuidString)"
+
+    // 未固定 → 維持字表順序；字頻不再影響排序
+    tracker.record(code: code, char: "號")
+    tracker.record(code: code, char: "號")
+    tracker.flushAll()
+    let unpinned = ranker.rank(raw: ["好", "號"], code: code, mode: .t, cinTable: table, freqTracker: tracker)
+    checkEqual(unpinned, ["好", "號"], "無固定排序時維持字表順序（不做字頻排序）")
+
+    // ,,PIN 固定 → 固定字排最前，其餘維持字表順序
+    tracker.pin(code: code, chars: ["號"])
+    let pinned = ranker.rank(raw: ["好", "號"], code: code, mode: .t, cinTable: table, freqTracker: tracker)
+    checkEqual(pinned, ["號", "好"], "固定排序的字排到最前")
+
+    tracker.unpin(code: code)
+    tracker.reset()
 }
 
 // === Integration tests: full typing flow ===
@@ -453,6 +475,7 @@ testCINTableValidNextKeys()
 testFreqTrackerRecordAndSort()
 testFreqTrackerBigramBoost()
 testRankerModeFiltering()
+testRankerPinnedOrderOnly()
 testIntegrationTypeAndCommit()
 testIntegrationTypeMultiChar()
 testIntegrationBackspaceAndRetype()

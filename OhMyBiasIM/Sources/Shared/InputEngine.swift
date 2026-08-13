@@ -841,7 +841,7 @@ final class InputEngine {
             return
         }
         let raw = _isWildcard ? cinTable.wildcardLookup(code) : cinTable.lookup(code)
-        _currentCandidates = ranker.rank(raw: raw, code: code, prev: _lastCommitted,
+        _currentCandidates = ranker.rank(raw: raw, code: code,
                                          mode: _inputMode, cinTable: cinTable, freqTracker: freqTracker)
 
         // Fuzzy match: if no candidates, try adjacent-key substitution
@@ -872,14 +872,6 @@ final class InputEngine {
             delegate?.engineDidCommitPair(text, right)
         } else {
             delegate?.engineDidCommit(text)
-        }
-        if !_composing.isEmpty && !_isSameSoundMode {
-            freqTracker.record(code: _composing, char: text)
-            freqTracker.recordBigram(prev: _lastCommitted, char: text)
-            if !_prevCommitted.isEmpty {
-                freqTracker.recordTrigram(prev2: _prevCommitted, prev1: _lastCommitted, char: text)
-            }
-            freqTracker.saveIfNeeded()
         }
         _prevCommitted = _lastCommitted
         _lastCommitted = text.count == 1 ? text : String(text.suffix(1))

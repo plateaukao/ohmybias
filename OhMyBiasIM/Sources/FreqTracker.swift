@@ -205,18 +205,22 @@ final class FreqTracker {
 
     /// Reload pinned cache from DB (called when prefs change from external app).
     func reloadPinned() {
-        bgQueue.sync { pinnedCache.removeAll(); loadPinnedCache() }
+        bgQueue.sync { loadPinnedCache() }
     }
 
+    /// 先建好新字典再一次換掉 — pinnedCache 每個按鍵都會讀（CandidateRanker），
+    /// 不能讓讀取方看到清空到一半的狀態
     private func loadPinnedCache() {
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, "SELECT code, chars FROM pinned", -1, &stmt, nil) == SQLITE_OK else { return }
+        var fresh: [String: [String]] = [:]
         while sqlite3_step(stmt) == SQLITE_ROW {
             let code = String(cString: sqlite3_column_text(stmt, 0))
             let chars = String(cString: sqlite3_column_text(stmt, 1))
-            pinnedCache[code] = Array(chars).map(String.init)
+            fresh[code] = Array(chars).map(String.init)
         }
         sqlite3_finalize(stmt)
+        pinnedCache = fresh
     }
 
     /// Set pinned order for a code. chars is the ordered list of characters.

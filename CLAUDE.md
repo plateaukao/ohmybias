@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-OhMyBias 米 — macOS 嘸蝦米（Boshiamy）輸入法，Yabomish 的極簡分支（*OhMyBias* 為 *Boshiamy* 之字母重組）。純 Swift、零依賴、單一版本、**單一 app**：**OhMyBiasIM.app**（IMK 輸入法 → `/Library/Input Methods/`），SwiftUI 設定視窗內建其中（`Sources/PrefsUI/`，輸入法選單 →「偏好設定⋯」開啟；`PrefsWindow` 只隱藏不 terminate — terminate 會殺掉輸入法本體）。只有打字、查碼、繁簡轉換、字頻排序、`,,` 指令、擴充表 — **沒有**聯想／詞庫／語料，也刻意不加回去。文件、commit、註解、UI 皆用繁體中文。
+OhMyBias 米 — macOS 嘸蝦米（Boshiamy）輸入法，Yabomish 的極簡分支（*OhMyBias* 為 *Boshiamy* 之字母重組）。純 Swift、零依賴、單一版本、**單一 app**：**OhMyBiasIM.app**（IMK 輸入法 → `/Library/Input Methods/`），SwiftUI 設定視窗內建其中（`Sources/PrefsUI/`，輸入法選單 →「偏好設定⋯」開啟；`PrefsWindow` 只隱藏不 terminate — terminate 會殺掉輸入法本體）。只有打字、查碼、繁簡轉換、固定排序（`,,PIN`）、`,,` 指令、擴充表 — **沒有**聯想／詞庫／語料／字頻學習，也刻意不加回去。候選字順序＝字表順序＋`,,PIN` 固定排序，按鍵路徑不碰 SQLite。文件、commit、註解、UI 皆用繁體中文。
 
 ## Build & install
 
@@ -36,7 +36,7 @@ OhMyBiasIM/Tests/run_tests.sh
 - `OhMyBiasIM/Sources/`（macOS）：`OhMyBiasInputController.swift`＝IMKInputController（鍵盤事件、IMK 整合）；`CandidatePanel.swift`＝選字窗（游標跟隨＋固定模式，可拖曳）；`AppDelegate.swift` 啟動 IMKServer。
 - `OhMyBiasIM/Sources/Shared/`：**禁止 import AppKit/IMK**。`InputEngine.swift` 是核心狀態機（組字、選字、`,,` 指令），透過 `InputEngineDelegate` 回呼；`IMEPreferences.swift` 為可注入的偏好協定。
 
-按鍵資料流：keyCode → `OhMyBiasInputController` → `InputEngine`（`CINTable` 查表、`CandidateRanker`＋`FreqTracker` n-gram 排序）→ delegate → 選字窗。
+按鍵資料流：keyCode → `OhMyBiasInputController` → `InputEngine`（`CINTable` 查表、`CandidateRanker` 依 `,,PIN` 固定排序，無固定則維持字表順序）→ delegate → 選字窗。`FreqTracker` 只剩 pinned 表在用（快取於記憶體）；freq／bigram 機制保留但打字路徑不再呼叫。
 
 儲存：使用者匯入 `liu.cin` → `CINCompiler` 編成 `liu.bin`（mmap 零拷貝）。使用者資料在 `~/Library/Application Support/OhMyBias/`（cin/bin、`freq.db`、`tables/` 擴充表、`commands.json`）。偏好透過 `info.plateaukao.inputmethod.ohmybias` defaults domain（＝bundle id，**必須含 `inputmethod` 子字串**，否則 TIS 不註冊、系統設定看不到）共享，變更以 distributed notification `info.plateaukao.ohmybias.prefsChanged` 通知（通知名為寫死字串，與 bundle id 無關）。
 

@@ -287,7 +287,6 @@ class OhMyBiasInputController: IMKInputController {
             }
         }
         panel.hide()
-        Self.freqTracker.flushAll()
         Self.activeSession = nil
         Self.lastDeactivateTime = Date()
         super.deactivateServer(sender)
@@ -425,7 +424,9 @@ extension OhMyBiasInputController {
     private static var _engineKey = 0
     var engine: InputEngine {
         if let e = objc_getAssociatedObject(self, &Self._engineKey) as? InputEngine { return e }
-        let e = InputEngine(cinTable: Self.cinTable)
+        // IMK 每個 client app 各建一個 controller — freqTracker 必須共用，
+        // 否則每個 app 各開一條 SQLite 連線、,,PIN 也不會跨 app 生效
+        let e = InputEngine(cinTable: Self.cinTable, freqTracker: Self.freqTracker)
         e.delegate = self
         e.loadTable()
         objc_setAssociatedObject(self, &Self._engineKey, e, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
