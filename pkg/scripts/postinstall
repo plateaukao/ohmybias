@@ -1,0 +1,14 @@
+#!/bin/bash
+# OhMyBias pkg postinstall — 結束舊版並以目前登入使用者註冊輸入法。
+# 多數情況安裝完即可在輸入方式清單看到 OhMyBias；保險起見安裝結尾仍建議登出再登入。
+
+pkill -x OhMyBiasIM 2>/dev/null || true
+
+console_user=$(stat -f%Su /dev/console 2>/dev/null || echo "")
+if [ -n "$console_user" ] && [ "$console_user" != "root" ]; then
+    uid=$(id -u "$console_user")
+    launchctl asuser "$uid" /System/Library/Frameworks/InputMethodKit.framework/Versions/A/Resources/imklaunchagent 2>/dev/null || true
+    launchctl asuser "$uid" open "/Library/Input Methods/OhMyBiasIM.app" 2>/dev/null || true
+fi
+
+exit 0

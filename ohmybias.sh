@@ -3,7 +3,7 @@ set -e
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
 
-# OhMyBias 建置／安裝工具 — 單一極簡版本，無選項
+# OhMyBias 建置／安裝工具（開發用；使用者請用 release 的 OhMyBias.pkg）
 # 用法: ./ohmybias.sh            編譯 + 安裝
 #       ./ohmybias.sh build      只編譯
 #       ./ohmybias.sh install    只安裝（已編譯過）
@@ -18,8 +18,6 @@ IM_SRC="$ROOT/OhMyBiasIM/Sources"
 IM_RES="$ROOT/OhMyBiasIM/Resources"
 IM_BUILD="$ROOT/OhMyBiasIM/build"
 IM_APP="$IM_BUILD/OhMyBiasIM.app"
-PREFS_DIR="$ROOT/OhMyBiasPrefs"
-PREFS_APP="$PREFS_DIR/build/OhMyBiasPrefs.app"
 INSTALL_DIR="/Library/Input Methods"
 USER_DIR="$HOME/Library/Application Support/OhMyBias"
 IM_BUNDLE_ID="info.plateaukao.ohmybias"
@@ -64,25 +62,6 @@ build_im() {
     ok "OhMyBiasIM.app (build $STAMP.$HASH, $(du -sh "$IM_APP" | cut -f1))"
 }
 
-build_prefs() {
-    printf "${C}> 編譯偏好設定...${N}\n"
-    rm -rf "$PREFS_APP"
-    mkdir -p "$PREFS_APP/Contents/MacOS" "$PREFS_APP/Contents/Resources"
-
-    cp "$PREFS_DIR/Resources/Info.plist" "$PREFS_APP/Contents/"
-    cp "$PREFS_DIR/Resources/AppIcon.icns" "$PREFS_APP/Contents/Resources/"
-
-    swiftc -module-name OhMyBiasPrefs \
-        -target arm64-apple-macos14.0 \
-        -sdk "$(xcrun --show-sdk-path)" -O \
-        -framework SwiftUI -framework AppKit -framework UniformTypeIdentifiers \
-        -o "$PREFS_APP/Contents/MacOS/OhMyBiasPrefs" \
-        "$PREFS_DIR"/Sources/*.swift
-
-    chmod +x "$PREFS_APP/Contents/MacOS/OhMyBiasPrefs"
-    ok "OhMyBiasPrefs.app"
-}
-
 do_install() {
     [ -d "$IM_APP" ] || err "請先執行 ./ohmybias.sh build"
     printf "${C}> 安裝輸入法（需要管理員密碼）...${N}\n"
@@ -91,16 +70,6 @@ do_install() {
     sudo rm -rf "$INSTALL_DIR/OhMyBiasIM.app"
     sudo cp -R "$IM_APP" "$INSTALL_DIR/"
     sudo chmod -R a+rX "$INSTALL_DIR/OhMyBiasIM.app"
-
-    rm -rf /Applications/OhMyBiasPrefs.app
-    cp -R "$PREFS_APP" /Applications/
-    ok "OhMyBiasPrefs.app -> /Applications/"
-
-    # 使用者資料夾與預設自訂指令
-    mkdir -p "$USER_DIR/tables"
-    cp "$IM_RES/ohmybias_capture.sh" "$USER_DIR/" && chmod +x "$USER_DIR/ohmybias_capture.sh"
-    [ ! -f "$USER_DIR/commands.json" ] && cp "$IM_RES/commands-example.json" "$USER_DIR/commands.json"
-
     ok "輸入法已安裝"
 
     printf "${C}> 重新啟動輸入法...${N}\n"
@@ -124,7 +93,6 @@ do_uninstall() {
     [[ "$c" =~ ^[Yy]$ ]] || { echo "已取消。"; return; }
     killall OhMyBiasIM 2>/dev/null || true; sleep 0.5
     sudo rm -rf "$INSTALL_DIR/OhMyBiasIM.app"
-    rm -rf /Applications/OhMyBiasPrefs.app
     defaults delete $IM_BUNDLE_ID 2>/dev/null || true
     printf "一併刪除使用者資料（字表、字頻）？[y/N] "; read -r c
     [[ "$c" =~ ^[Yy]$ ]] && rm -rf "$USER_DIR" && echo "已刪除 $USER_DIR"
@@ -133,9 +101,9 @@ do_uninstall() {
 
 check_xcode
 case "${1:-}" in
-    build)     build_im; build_prefs;;
+    build)     build_im;;
     install)   do_install;;
     uninstall) do_uninstall;;
-    "")        build_im; build_prefs; do_install;;
+    "")        build_im; do_install;;
     *)         echo "用法: $0 [build|install|uninstall]"; exit 1;;
 esac

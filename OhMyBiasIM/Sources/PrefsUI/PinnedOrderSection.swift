@@ -242,11 +242,4 @@ struct PinnedOrderSection: View {
 
 private let SQLITE_TRANSIENT_ = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
-private extension Data {
-    func u32(_ offset: Int) -> UInt32 {
-        withUnsafeBytes { $0.load(fromByteOffset: offset, as: UInt32.self) }
-    }
-    func u16(_ offset: Int) -> UInt16 {
-        withUnsafeBytes { $0.load(fromByteOffset: offset, as: UInt16.self) }
-    }
-}
+// Data.u16/u32 來自 Shared/DataExt.swift（同一 module）

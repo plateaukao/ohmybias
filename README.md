@@ -1,34 +1,36 @@
 # OhMyBias 米
 
-macOS 嘸蝦米（Boshiamy）輸入法 — 純 Swift、零依賴、極簡。
+macOS 嘸蝦米（Boshiamy）輸入法 — 純 Swift、零依賴、極簡、單一 app。
 
 Yabomish 的極簡分支：只保留打字本體 — 打字、查碼（注音／拼音反查）、繁簡轉換、
 字頻學習排序、`,,` 指令、擴充表。沒有聯想、沒有詞庫、沒有語料，約 2MB。
+設定視窗內建在輸入法裡（輸入法選單 →「偏好設定⋯」），沒有獨立設定 app。
 
 （*OhMyBias* 是 *Boshiamy* 的字母重組。）
 
 ## 安裝
 
-```bash
-./ohmybias.sh          # 編譯 + 安裝（需要管理員密碼）
-```
-
-安裝後：系統設定 → 鍵盤 → 輸入方式 → + → 繁體中文 → OhMyBias。
+從 Release 下載 `OhMyBias-x.y.z.pkg`，雙擊安裝。安裝結尾建議登出再登入
+（也可以稍後），然後到 系統設定 → 鍵盤 → 輸入方式 → + → 繁體中文 → OhMyBias。
 首次切換時會引導匯入你的 `liu.cin` 字表（需自備合法取得的嘸蝦米字表）。
 
 ## 開發
 
 ```bash
+./ohmybias.sh                  # 編譯 + 安裝（開發用，需要管理員密碼）
 ./ohmybias.sh build            # 只編譯（無 Xcode 專案，raw swiftc）
 OhMyBiasIM/Tests/run_tests.sh  # 單元測試
-./release.sh                   # 簽章 + 公證發佈
+./release.sh                   # 簽章 + 公證 → OhMyBias-x.y.z.pkg
 ```
 
-兩個 app：**OhMyBiasIM.app**（InputMethodKit 輸入法，裝到 `/Library/Input Methods/`）、
-**OhMyBiasPrefs.app**（SwiftUI 設定程式，裝到 `/Applications/`）。
-版本號取自 CHANGELOG.md 第一個 `## [x.y.z]` 標題。
+單一 app：**OhMyBiasIM.app**（InputMethodKit 輸入法＋內建 SwiftUI 設定視窗，
+裝到 `/Library/Input Methods/`）。版本號取自 CHANGELOG.md 第一個 `## [x.y.z]` 標題。
 
-使用者資料在 `~/Library/Application Support/OhMyBias/`（字表、freq.db、tables/、commands.json）。
+release 需要兩張憑證：Developer ID **Application**（簽 app）與 Developer ID
+**Installer**（簽 pkg）。
+
+使用者資料在 `~/Library/Application Support/OhMyBias/`（字表、freq.db、tables/、commands.json），
+由 app 首次啟動時自動建立。
 
 ## 授權
 

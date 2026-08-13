@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>OhMyBias 米 輸入法</title>
+    <welcome file="welcome.html"/>
+    <conclusion file="conclusion.html"/>
+    <options customize="never" hostArchitectures="arm64"/>
+    <allowed-os-versions><os-version min="14.0"/></allowed-os-versions>
+    <domains enable_localSystem="true"/>
+    <choices-outline>
+        <line choice="default">
+            <line choice="info.plateaukao.ohmybias.pkg"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="info.plateaukao.ohmybias.pkg" visible="false">
+        <pkg-ref id="info.plateaukao.ohmybias.pkg"/>
+    </choice>
+    <!-- RequireLogout：安裝結尾顯示「登出」按鈕；使用者也可先結束安裝程式、稍後再登出 -->
+    <pkg-ref id="info.plateaukao.ohmybias.pkg" onConclusion="RequireLogout">OhMyBiasIM-component.pkg</pkg-ref>
+</installer-gui-script>

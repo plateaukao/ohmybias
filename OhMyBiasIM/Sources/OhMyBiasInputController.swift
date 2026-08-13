@@ -218,15 +218,7 @@ class OhMyBiasInputController: IMKInputController {
     }
 
     @objc private func openPrefs() {
-        let appURL = URL(fileURLWithPath: "/Applications/OhMyBiasPrefs.app")
-        if FileManager.default.fileExists(atPath: appURL.path) {
-            NSWorkspace.shared.openApplication(at: appURL, configuration: .init())
-        } else {
-            let a = NSAlert()
-            a.messageText = "找不到設定程式"
-            a.informativeText = "請執行 ohmybias.sh 安裝 OhMyBiasPrefs.app 到 /Applications。"
-            a.runModal()
-        }
+        PrefsWindow.shared.show()
     }
 
     private static var lastAppliedKeyboardLayout: String?

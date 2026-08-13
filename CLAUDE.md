@@ -4,19 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-OhMyBias 米 — macOS 嘸蝦米（Boshiamy）輸入法，Yabomish 的極簡分支（*OhMyBias* 為 *Boshiamy* 之字母重組）。純 Swift、零依賴、單一版本：只有打字、查碼、繁簡轉換、字頻排序、`,,` 指令、擴充表 — **沒有**聯想／詞庫／語料，也刻意不加回去。兩個 app：**OhMyBiasIM.app**（IMK 輸入法 → `/Library/Input Methods/`）、**OhMyBiasPrefs.app**（SwiftUI 設定 → `/Applications/`）。文件、commit、註解、UI 皆用繁體中文。
+OhMyBias 米 — macOS 嘸蝦米（Boshiamy）輸入法，Yabomish 的極簡分支（*OhMyBias* 為 *Boshiamy* 之字母重組）。純 Swift、零依賴、單一版本、**單一 app**：**OhMyBiasIM.app**（IMK 輸入法 → `/Library/Input Methods/`），SwiftUI 設定視窗內建其中（`Sources/PrefsUI/`，輸入法選單 →「偏好設定⋯」開啟；`PrefsWindow` 只隱藏不 terminate — terminate 會殺掉輸入法本體）。只有打字、查碼、繁簡轉換、字頻排序、`,,` 指令、擴充表 — **沒有**聯想／詞庫／語料，也刻意不加回去。文件、commit、註解、UI 皆用繁體中文。
 
 ## Build & install
 
-沒有 Xcode 專案、沒有 SPM — `ohmybias.sh` 直接呼叫 swiftc，編所有 `OhMyBiasIM/Sources/**/*.swift` 與 `OhMyBiasPrefs/Sources/*.swift`。新增檔案＝放進目錄即可。
+沒有 Xcode 專案、沒有 SPM — `ohmybias.sh` 直接呼叫 swiftc，編所有 `OhMyBiasIM/Sources/**/*.swift`（含 `PrefsUI/`）。新增檔案＝放進目錄即可。
 
 ```bash
-./ohmybias.sh          # 編譯 + 安裝（sudo）
+./ohmybias.sh          # 編譯 + 安裝（開發用，sudo）
 ./ohmybias.sh build    # 只編譯
-./release.sh           # 簽章（Developer ID）+ 公證 + staple → OhMyBiasIM.zip / OhMyBiasPrefs.zip
+./release.sh           # 簽 app + pkgbuild/productbuild + 簽 pkg + 公證 + staple → OhMyBias-x.y.z.pkg
 ```
 
-單一版本、無模式選項。版本號取自 CHANGELOG.md 第一個 `## [x.y.z]`（改版＝加 CHANGELOG 條目）。簽章後的 bundle 不可再修改。
+單一版本、無模式選項。版本號取自 CHANGELOG.md 第一個 `## [x.y.z]`（改版＝加 CHANGELOG 條目）。發佈給使用者的是 **pkg**（`pkg/` 內有 distribution.xml、postinstall、welcome/conclusion 頁；`onConclusion="RequireLogout"` 讓安裝結尾建議登出）。release 需要 Developer ID Application＋Installer 兩張憑證。簽章後的 bundle 不可再修改。使用者資料夾由 app 啟動時建立（`AppDelegate.setUpUserDir`），pkg postinstall 不碰使用者家目錄。
 
 ## Tests
 

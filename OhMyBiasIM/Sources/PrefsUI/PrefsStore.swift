@@ -1,9 +1,9 @@
 import Foundation
 
-/// Thin @Observable wrapper over the same UserDefaults keys used by OhMyBiasPrefs (in the IM bundle).
-/// All reads/writes go directly through UserDefaults — no stored copies, no duplicated defaults.
+/// Thin @Observable wrapper over the same UserDefaults keys used by OhMyBiasPrefs.
+/// 與輸入法同進程（設定視窗內嵌於 OhMyBiasIM.app），直接用 standard defaults。
 @Observable final class PrefsStore {
-    @ObservationIgnored private let ud = UserDefaults(suiteName: "info.plateaukao.ohmybias")!
+    @ObservationIgnored private let ud = UserDefaults.standard
 
     // MARK: - Font sizes
 
