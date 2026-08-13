@@ -62,4 +62,4 @@ xcrun stapler staple "$PKG_OUT"
 
 echo ""
 echo "==> 完成！"
-echo "    $PKG_OUT（雙擊安裝；結尾建議登出再登入，也可稍後）"
+echo "    ${PKG_OUT}（雙擊安裝；結尾建議登出再登入，也可稍後）"
