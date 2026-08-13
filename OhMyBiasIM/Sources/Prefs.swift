@@ -126,7 +126,7 @@ struct OhMyBiasPrefs {
         set { defaults.set(newValue, forKey: "highContrast") }
     }
 
-    /// 同步資料夾（nil = 不開啟，使用本機 AppConstants.sharedDir）— 同步 freq.json + tables/*.txt
+    /// 同步資料夾（nil = 不開啟，使用本機 AppConstants.sharedDir）— 同步 tables/*.txt
     static var syncFolder: String? {
         get { defaults.string(forKey: "syncFolder") }
         set { defaults.set(newValue, forKey: "syncFolder") }

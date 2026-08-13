@@ -61,7 +61,7 @@ class OhMyBiasInputController: IMKInputController {
         return t
     }()
 
-    private static let freqTracker = FreqTracker()
+    private static let pinnedStore = PinnedStore()
     private static weak var activeSession: OhMyBiasInputController?
     private static var lastDeactivateTime: Date = .distantPast
     private var lastCommittedLength: Int = 0
@@ -424,9 +424,9 @@ extension OhMyBiasInputController {
     private static var _engineKey = 0
     var engine: InputEngine {
         if let e = objc_getAssociatedObject(self, &Self._engineKey) as? InputEngine { return e }
-        // IMK 每個 client app 各建一個 controller — freqTracker 必須共用，
+        // IMK 每個 client app 各建一個 controller — pinnedStore 必須共用，
         // 否則每個 app 各開一條 SQLite 連線、,,PIN 也不會跨 app 生效
-        let e = InputEngine(cinTable: Self.cinTable, freqTracker: Self.freqTracker)
+        let e = InputEngine(cinTable: Self.cinTable, pinnedStore: Self.pinnedStore)
         e.delegate = self
         e.loadTable()
         objc_setAssociatedObject(self, &Self._engineKey, e, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)

@@ -19,7 +19,7 @@ OhMyBias 米 — macOS 嘸蝦米（Boshiamy）輸入法，Yabomish 的極簡分�
 
 編譯目標 `arm64-apple-macos14.0`（Apple Silicon、macOS 14+）。公證用 keychain profile `notarytool`。打包必須經 component plist 把 `BundleIsRelocatable` 設 false（release.sh 已處理，勿改回 `pkgbuild --component`）— 否則機器上若有同 bundle id 的副本（開發機的 `build/`），Installer 會把 payload relocate 去蓋那份，`/Library/Input Methods` 裝不進去。
 
-單一版本、無模式選項。版本號取自 CHANGELOG.md 第一個 `## [x.y.z]`（改版＝加 CHANGELOG 條目）。發佈給使用者的是 **pkg**（`pkg/` 內有 distribution.xml、postinstall、welcome/conclusion 頁；不設 `onConclusion` — `RequireLogout` 會讓結尾只剩強制「登出」鈕，登出僅作為 conclusion 頁的建議）。release 需要 Developer ID Application＋Installer 兩張憑證。簽章後的 bundle 不可再修改。使用者資料夾由 app 啟動時建立（`AppDelegate.setUpUserDir`），pkg postinstall 不碰使用者家目錄。
+單一版本、無模式選項。版本號取自 CHANGELOG.md 第一個 `## [x.y.z]`（改版＝加 CHANGELOG 條目）。已發佈版本的條目不可再改；發佈後的變更寫在最上方的 `## 未發佈` 段（標題**不加方括號**，否則會被版本號解析抓走），發新版時再改成 `## [x.y.z]`。發佈給使用者的是 **pkg**（`pkg/` 內有 distribution.xml、postinstall、welcome/conclusion 頁；不設 `onConclusion` — `RequireLogout` 會讓結尾只剩強制「登出」鈕，登出僅作為 conclusion 頁的建議）。release 需要 Developer ID Application＋Installer 兩張憑證。簽章後的 bundle 不可再修改。使用者資料夾由 app 啟動時建立（`AppDelegate.setUpUserDir`），pkg postinstall 不碰使用者家目錄。
 
 ## Tests
 
@@ -36,9 +36,9 @@ OhMyBiasIM/Tests/run_tests.sh
 - `OhMyBiasIM/Sources/`（macOS）：`OhMyBiasInputController.swift`＝IMKInputController（鍵盤事件、IMK 整合）；`CandidatePanel.swift`＝選字窗（游標跟隨＋固定模式，可拖曳）；`AppDelegate.swift` 啟動 IMKServer。
 - `OhMyBiasIM/Sources/Shared/`：**禁止 import AppKit/IMK**。`InputEngine.swift` 是核心狀態機（組字、選字、`,,` 指令），透過 `InputEngineDelegate` 回呼；`IMEPreferences.swift` 為可注入的偏好協定。
 
-按鍵資料流：keyCode → `OhMyBiasInputController` → `InputEngine`（`CINTable` 查表、`CandidateRanker` 依 `,,PIN` 固定排序，無固定則維持字表順序）→ delegate → 選字窗。`FreqTracker` 只剩 pinned 表在用（快取於記憶體）；freq／bigram 機制保留但打字路徑不再呼叫。
+按鍵資料流：keyCode → `OhMyBiasInputController` → `InputEngine`（`CINTable` 查表、`CandidateRanker` 依 `,,PIN` 固定排序，無固定則維持字表順序）→ delegate → 選字窗。固定排序由 `PinnedStore`（`pinned.db` 單表＋記憶體快取，全 controller 共用）儲存；字頻學習機制已整組移除（首次啟動會把舊 `freq.db` 的固定排序搬進 `pinned.db` 後刪除舊檔）。
 
-儲存：使用者匯入 `liu.cin` → `CINCompiler` 編成 `liu.bin`（mmap 零拷貝）。使用者資料在 `~/Library/Application Support/OhMyBias/`（cin/bin、`freq.db`、`tables/` 擴充表、`commands.json`）。偏好透過 `info.plateaukao.inputmethod.ohmybias` defaults domain（＝bundle id，**必須含 `inputmethod` 子字串**，否則 TIS 不註冊、系統設定看不到）共享，變更以 distributed notification `info.plateaukao.ohmybias.prefsChanged` 通知（通知名為寫死字串，與 bundle id 無關）。
+儲存：使用者匯入 `liu.cin` → `CINCompiler` 編成 `liu.bin`（mmap 零拷貝）。使用者資料在 `~/Library/Application Support/OhMyBias/`（cin/bin、`pinned.db`、`tables/` 擴充表、`commands.json`）。偏好透過 `info.plateaukao.inputmethod.ohmybias` defaults domain（＝bundle id，**必須含 `inputmethod` 子字串**，否則 TIS 不註冊、系統設定看不到）共享，變更以 distributed notification `info.plateaukao.ohmybias.prefsChanged` 通知（通知名為寫死字串，與 bundle id 無關）。
 
 ## 與 Yabomish 的關係
 

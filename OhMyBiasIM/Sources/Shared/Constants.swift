@@ -11,6 +11,6 @@ enum AppConstants {
     }
 
     static var cinPath: String { sharedDir + "/liu.cin" }
-    static var freqPath: String { sharedDir + "/freq.db" }
+    static var pinnedPath: String { sharedDir + "/pinned.db" }
     static var tablesDir: String { sharedDir + "/tables" }
 }

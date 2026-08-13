@@ -235,70 +235,42 @@ func testCINTableValidNextKeys() {
     check(keys.contains("b"), "validNextKeys(after: 'a') contains 'b'")
 }
 
-// === FreqTracker tests ===
-
-func testFreqTrackerRecordAndSort() {
-    let tracker = FreqTracker()
-    let code = "_test_sort_\(UUID().uuidString)"
-    tracker.record(code: code, char: "A")
-    tracker.record(code: code, char: "A")
-    tracker.record(code: code, char: "A")
-    tracker.record(code: code, char: "B")
-    tracker.flushAll()
-    let sorted = tracker.sorted(["B", "A"], forCode: code)
-    checkEqual(sorted, ["A", "B"], "A (3x) before B (1x)")
-    tracker.reset()
-}
-
-func testFreqTrackerBigramBoost() {
-    let tracker = FreqTracker()
-    for _ in 0..<5 { tracker.recordBigram(prev: "甲", char: "乙") }
-    tracker.flushAll()
-    let top = tracker.topBigrams(prev: "甲")
-    check(top.contains("乙"), "topBigrams(prev: '甲') contains '乙'")
-    let boosted = tracker.bigramBoost(prev: "甲", candidates: ["丙", "乙"])
-    check(boosted.first == "乙", "bigramBoost moves '乙' before '丙'")
-    tracker.reset()
-}
-
 // === CandidateRanker tests ===
 
 func testRankerModeFiltering() {
     let table = loadTestCINTable()
-    let tracker = FreqTracker()
+    let store = PinnedStore()
     let ranker = CandidateRanker()
 
     // mode .t — no filtering, returns both
-    let tResult = ranker.rank(raw: ["好", "號"], code: "a", mode: .t, cinTable: table, freqTracker: tracker)
+    let tResult = ranker.rank(raw: ["好", "號"], code: "a", mode: .t, cinTable: table, pinnedStore: store)
     check(tResult.contains("好"), "mode .t keeps 好")
     check(tResult.contains("號"), "mode .t keeps 號")
 
     // mode .sp — only chars whose shortest code == "a"
-    let spResult = ranker.rank(raw: ["好", "號"], code: "a", mode: .sp, cinTable: table, freqTracker: tracker)
+    let spResult = ranker.rank(raw: ["好", "號"], code: "a", mode: .sp, cinTable: table, pinnedStore: store)
     // Both 好 and 號 have shortest code "a" (1 char), so both should remain
     check(spResult.contains("好") || spResult.contains("號"), "mode .sp keeps chars with shortest code 'a'")
 }
 
 func testRankerPinnedOrderOnly() {
     let table = loadTestCINTable()
-    let tracker = FreqTracker()
+    let store = PinnedStore()
     let ranker = CandidateRanker()
     let code = "_test_pin_\(UUID().uuidString)"
 
-    // 未固定 → 維持字表順序；字頻不再影響排序
-    tracker.record(code: code, char: "號")
-    tracker.record(code: code, char: "號")
-    tracker.flushAll()
-    let unpinned = ranker.rank(raw: ["好", "號"], code: code, mode: .t, cinTable: table, freqTracker: tracker)
-    checkEqual(unpinned, ["好", "號"], "無固定排序時維持字表順序（不做字頻排序）")
+    // 未固定 → 維持字表順序
+    let unpinned = ranker.rank(raw: ["好", "號"], code: code, mode: .t, cinTable: table, pinnedStore: store)
+    checkEqual(unpinned, ["好", "號"], "無固定排序時維持字表順序")
 
     // ,,PIN 固定 → 固定字排最前，其餘維持字表順序
-    tracker.pin(code: code, chars: ["號"])
-    let pinned = ranker.rank(raw: ["好", "號"], code: code, mode: .t, cinTable: table, freqTracker: tracker)
+    store.pin(code: code, chars: ["號"])
+    let pinned = ranker.rank(raw: ["好", "號"], code: code, mode: .t, cinTable: table, pinnedStore: store)
     checkEqual(pinned, ["號", "好"], "固定排序的字排到最前")
 
-    tracker.unpin(code: code)
-    tracker.reset()
+    store.unpin(code: code)
+    let after = ranker.rank(raw: ["好", "號"], code: code, mode: .t, cinTable: table, pinnedStore: store)
+    checkEqual(after, ["好", "號"], "解除固定後回到字表順序")
 }
 
 // === Integration tests: full typing flow ===
@@ -472,8 +444,6 @@ testCINTableReverseLookup()
 testCINTableWildcard()
 testCINTableHasPrefix()
 testCINTableValidNextKeys()
-testFreqTrackerRecordAndSort()
-testFreqTrackerBigramBoost()
 testRankerModeFiltering()
 testRankerPinnedOrderOnly()
 testIntegrationTypeAndCommit()

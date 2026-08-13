@@ -15,9 +15,9 @@ final class CandidateRanker {
     /// 排序只依 `,,PIN` 固定排序：有固定的碼把固定字依序排前，其餘維持字表順序。
     /// 不查字頻、不打 SQLite — 按鍵路徑必須是純記憶體操作。
     func rank(raw: [String], code: String,
-              mode: InputEngine.InputMode, cinTable: CINTable, freqTracker: FreqTracker) -> [String] {
+              mode: InputEngine.InputMode, cinTable: CINTable, pinnedStore: PinnedStore) -> [String] {
         var candidates = raw
-        if let pinned = freqTracker.pinnedChars(forCode: code), !pinned.isEmpty {
+        if let pinned = pinnedStore.pinnedChars(forCode: code), !pinned.isEmpty {
             let pinSet = Set(pinned)
             let front = pinned.filter { candidates.contains($0) }
             candidates = front + candidates.filter { !pinSet.contains($0) }

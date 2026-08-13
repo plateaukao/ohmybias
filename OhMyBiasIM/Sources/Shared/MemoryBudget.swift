@@ -7,7 +7,7 @@ enum MemoryBudget {
     static let total: Int = 200
 
     static let cinTable: Int = 10       // table dict + trie + cache parse
-    static let freqTracker: Int = 2     // SQLite + prepared statements
+    static let pinnedStore: Int = 2     // SQLite + prepared statements
     static let bigramBin: Int = 1       // mmap bigram.bin
     static let phrasesBin: Int = 1      // mmap phrases.bin
     static let trigramBin: Int = 2      // mmap trigram.bin

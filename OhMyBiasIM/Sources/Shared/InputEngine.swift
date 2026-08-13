@@ -18,7 +18,7 @@ final class InputEngine {
     weak var delegate: InputEngineDelegate?
 
     let cinTable: CINTable
-    let freqTracker: FreqTracker
+    let pinnedStore: PinnedStore
     private let ranker: CandidateRanker
     private let zhuyinLookup: ZhuyinLookup
     private let prefs: IMEPreferences
@@ -30,11 +30,11 @@ final class InputEngine {
     }
 
     init(cinTable: CINTable? = nil,
-         freqTracker: FreqTracker? = nil,
+         pinnedStore: PinnedStore? = nil,
          zhuyinLookup: ZhuyinLookup = .shared,
          prefs: IMEPreferences = DefaultPreferences.shared) {
         self.cinTable = cinTable ?? CINTable()
-        self.freqTracker = freqTracker ?? FreqTracker()
+        self.pinnedStore = pinnedStore ?? PinnedStore()
         self.zhuyinLookup = zhuyinLookup
         self.prefs = prefs
         self.ranker = CandidateRanker(prefs: prefs)
@@ -122,10 +122,6 @@ final class InputEngine {
         cinTable.reload()
     }
 
-    func scheduleBackgroundTasks() {
-        freqTracker.deferredMerge()
-    }
-
     // MARK: - Public API (called by KeyboardViewController)
 
     func handleLetter(_ char: String) { sync {
@@ -199,7 +195,7 @@ final class InputEngine {
         // Pin mode: space confirms the pinned order
         if _isPinMode {
             if !_pinCode.isEmpty && !_pinPicked.isEmpty {
-                freqTracker.pin(code: _pinCode, chars: _pinPicked)
+                pinnedStore.pin(code: _pinCode, chars: _pinPicked)
                 delegate?.engineDidShowToast("已固定 \(_pinCode) → \(_pinPicked.joined())")
             } else if !_pinCode.isEmpty && _pinPicked.isEmpty {
                 // No picks yet — treat as "show candidates"
@@ -561,7 +557,6 @@ final class InputEngine {
         let modeMap: [String: InputMode] = [
             "t": .t, "s": .s, "sp": .sp, "sl": .sl, "ts": .ts, "st": .st, "j": .j
         ]
-        if cmd == "rs" { freqTracker.reset(); delegate?.engineDidShowToast("字頻已重置"); return }
         if cmd == "rl" { cinTable.reload(); CommaCommandRunner.reload(); delegate?.engineDidShowToast("字表已重載"); return }
         if cmd == "pin" {
             _isZhuyinMode = false; _clearZhuyinSlots()
@@ -577,8 +572,8 @@ final class InputEngine {
             let arg = String(cmd.dropFirst(5))  // e.g. "unpina" → "a"
             if arg.isEmpty {
                 delegate?.engineDidShowToast("用法：,,UNPIN + 碼（如 ,,UNPINa）")
-            } else if freqTracker.pinnedChars(forCode: arg) != nil {
-                freqTracker.unpin(code: arg)
+            } else if pinnedStore.pinnedChars(forCode: arg) != nil {
+                pinnedStore.unpin(code: arg)
                 delegate?.engineDidShowToast("已解除 \(arg) 的固定排序")
             } else {
                 delegate?.engineDidShowToast("\(arg) 無固定排序")
@@ -636,7 +631,7 @@ final class InputEngine {
             • ,,TS 繁→簡  ,,ST 簡→繁
             • ,,ZH 注音查碼  ,,TO 同音字
             • ,,PYS 拼音(簡)  ,,PYT 拼音(繁)
-            • ,,RS 重置字頻  ,,RL 重載字表
+            • ,,RL 重載字表
             • ,,PIN 固定同碼字排序  ,,UNPINx 解除
             \(sgxHelp)• ,,C 顯示目前模式
             • ,,H 顯示本說明
@@ -842,7 +837,7 @@ final class InputEngine {
         }
         let raw = _isWildcard ? cinTable.wildcardLookup(code) : cinTable.lookup(code)
         _currentCandidates = ranker.rank(raw: raw, code: code,
-                                         mode: _inputMode, cinTable: cinTable, freqTracker: freqTracker)
+                                         mode: _inputMode, cinTable: cinTable, pinnedStore: pinnedStore)
 
         // Fuzzy match: if no candidates, try adjacent-key substitution
         if _currentCandidates.isEmpty && !_isWildcard && code.count >= 2 && prefs.fuzzyMatch {

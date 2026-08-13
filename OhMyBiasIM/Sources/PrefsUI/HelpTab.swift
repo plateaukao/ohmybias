@@ -95,7 +95,6 @@ struct HelpTab: View {
                     (",,PYT", "拼音查碼（繁體）"),
                     (",,PYS", "拼音查碼（簡體）"),
                     (",,TO", "同音字查詢模式"),
-                    (",,RS", "重置字頻統計"),
                     (",,RL", "重載字表＋擴充表"),
                     (",,PIN", "固定同碼字排序"),
                     (",,UNPINx", "解除碼 x 的固定排序"),
@@ -111,7 +110,7 @@ struct HelpTab: View {
 
                 section("資料路徑", icon: "folder", items: [
                     ("liu.cin", "嘸蝦米字表"),
-                    ("freq.db", "字頻學習資料"),
+                    ("pinned.db", "固定排序資料（,,PIN）"),
                     ("tables/", "擴充表資料夾"),
                     ("debug.log", "Debug 日誌（開啟時）"),
                 ])

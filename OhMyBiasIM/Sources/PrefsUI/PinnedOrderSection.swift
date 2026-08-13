@@ -7,10 +7,7 @@ struct PinnedOrderSection: View {
     @State private var pinned: [String] = []
     @State private var allPinned: [(code: String, chars: String)] = []
 
-    private static let dbPath: String = {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        return appSupport.appendingPathComponent("OhMyBias/freq.db").path
-    }()
+    private static let dbPath = AppConstants.pinnedPath
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
