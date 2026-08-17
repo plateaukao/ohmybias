@@ -180,6 +180,7 @@ func makeTempCIN() -> String {
     a 好
     a 號
     ab 哈
+    abab 帕
     b 不
     %chardef end
     """
@@ -424,6 +425,52 @@ func testIntegrationSequentialCommits() {
     check(mock.commits.count == 3, "three sequential commits")
 }
 
+func testIntegrationNoCandidateKeepsComposing() {
+    let engine = InputEngine()
+    let mock = MockEngineDelegate()
+    engine.delegate = mock
+    let cinPath = makeTempCIN()
+    engine.cinTable.load(cinPath: cinPath)
+    try? FileManager.default.removeItem(atPath: cinPath)
+
+    // "z" 無候選字 — 組字串不清空，超過 maxCodeLength(4) 仍可續打
+    engine.handleLetter("z")
+    check(engine.currentCandidates.isEmpty, "'z' 無候選字")
+    for _ in 0..<4 { engine.handleLetter("z") }
+    checkEqual(engine.composing, "zzzzz", "無候選字時可打超過 maxCodeLength")
+    checkEqual(mock.commits.count, 0, "續打過程不送出任何字")
+}
+
+func testIntegrationSpaceCommitsRawWhenNoCandidate() {
+    let engine = InputEngine()
+    let mock = MockEngineDelegate()
+    engine.delegate = mock
+    let cinPath = makeTempCIN()
+    engine.cinTable.load(cinPath: cinPath)
+    try? FileManager.default.removeItem(atPath: cinPath)
+
+    for _ in 0..<5 { engine.handleLetter("z") }
+    engine.handleSpace()
+    checkEqual(mock.commits.first, "zzzzz", "無候選字按空白 → 原樣送出字母")
+    check(engine.composing.isEmpty, "送出後組字串清空")
+}
+
+func testIntegrationOverflowAutoCommitStillWorks() {
+    let engine = InputEngine()
+    let mock = MockEngineDelegate()
+    engine.delegate = mock
+    let cinPath = makeTempCIN()
+    engine.cinTable.load(cinPath: cinPath)
+    try? FileManager.default.removeItem(atPath: cinPath)
+
+    // "abab" 有候選（帕），再打一鍵超長 → 自動送出首選、以新鍵重新組字
+    for ch in ["a", "b", "a", "b"] { engine.handleLetter(ch) }
+    check(engine.currentCandidates.contains("帕"), "'abab' 有候選字")
+    engine.handleLetter("a")
+    checkEqual(mock.commits.first, "帕", "有候選字時超長仍自動送出首選")
+    checkEqual(engine.composing, "a", "超長後以新鍵重新組字")
+}
+
 // Run all tests
 print("Running OhMyBiasIM tests...")
 testHarness()
@@ -455,6 +502,9 @@ testIntegrationDigitSelect()
 testIntegrationCommaCommandMode()
 testIntegrationQuotePassthrough()
 testIntegrationSequentialCommits()
+testIntegrationNoCandidateKeepsComposing()
+testIntegrationSpaceCommitsRawWhenNoCandidate()
+testIntegrationOverflowAutoCommitStillWorks()
 
 print("\n\(passed) passed, \(failed) failed")
 exit(failed > 0 ? 1 : 0)

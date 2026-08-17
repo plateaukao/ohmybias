@@ -126,7 +126,6 @@ final class InputEngine {
 
     func handleLetter(_ char: String) { sync {
         _snapComposing = _composing; _snapCandidates = _currentCandidates; _snapIsWildcard = _isWildcard
-        _lastWasEmptySpace = false
 
         // Pin mode: letters build the code to pin
         if _isPinMode {
@@ -162,22 +161,15 @@ final class InputEngine {
         let newComposing = _composing + char
         let maxLen = cinTable.maxCodeLength
 
-        if newComposing.count > maxLen {
-            if !_currentCandidates.isEmpty {
-                _commitText(_currentCandidates[0])
-                _composing = char; _isWildcard = false
-            } else {
-                _resetComposing(); return
-            }
+        if newComposing.count > maxLen && !_currentCandidates.isEmpty {
+            _commitText(_currentCandidates[0])
+            _composing = char; _isWildcard = false
         } else {
+            // 無候選字時不清空、不限長度——讓使用者繼續打，空白鍵原樣送出（英文直印）
             _composing = newComposing
         }
 
         _refreshCandidates()
-
-        if _currentCandidates.isEmpty && _composing.count >= cinTable.maxCodeLength && !_isWildcard {
-            _resetComposing(); return
-        }
 
         if prefs.autoCommit &&
            _currentCandidates.count == 1 && _composing.count >= 2 && !_canExtendCode(_composing) {
@@ -186,8 +178,6 @@ final class InputEngine {
 
         _notifyComposing(); _notifyCandidates()
     } }
-
-    private var _lastWasEmptySpace = false
 
     func handleSpace() { sync {
         if _composing.isEmpty { return }
@@ -205,12 +195,6 @@ final class InputEngine {
             _resetComposing(); _currentCandidates = []; _notifyCandidates()
             delegate?.engineDidClearComposing(); return
         }
-        // Double-space = escape (clear composing)
-        if _lastWasEmptySpace && _currentCandidates.isEmpty {
-            _lastWasEmptySpace = false
-            _resetComposing(); delegate?.engineDidClearComposing(); return
-        }
-        _lastWasEmptySpace = _currentCandidates.isEmpty
         if _isInCommaCommand {
             if _commaCommandBuffer.isEmpty {
                 _isInCommaCommand = false; _resetComposing()
@@ -218,8 +202,9 @@ final class InputEngine {
             }
             _dispatchCommaCommand(); return
         }
+        // 無候選字：把打到一半的字母原樣送出（無蝦米下快速輸入英文）
         if _currentCandidates.isEmpty {
-            _resetComposing(); delegate?.engineDidClearComposing(); return
+            _commitText(_composing); return
         }
         _commitText(_currentCandidates[0])
     } }
