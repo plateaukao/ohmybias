@@ -12,7 +12,7 @@ private let inputOptions: [InputOption] = {
     opts += [
     .init(id: "autoCommit",           label: "自動送字",  icon: "arrow.right.circle",    desc: "滿碼自動送出"),
     .init(id: "showCodeHint",         label: "拆碼提示",  icon: "eye",                   desc: "送字後顯示碼"),
-    .init(id: "zhuyinReverseLookup",  label: "注音反查",  icon: "character.phonetic",    desc: "'; 切換"),
+    .init(id: "zhuyinReverseLookup",  label: "注音反查",  icon: "character.phonetic",    desc: "' ; 切換"),
     .init(id: "homophoneMultiReading",label: "同音多讀",  icon: "speaker.wave.2",        desc: "含罕見讀音"),
     .init(id: "fuzzyMatch",           label: "模糊匹配",  icon: "magnifyingglass",       desc: "鄰鍵容錯"),
     .init(id: "punctuationPairing",   label: "標點配對",  icon: "quote.opening",         desc: "「→「」自動配對"),
@@ -37,7 +37,7 @@ struct InputTab: View {
                 GroupBox {
                     VStack(alignment: .leading, spacing: 8) {
                         Label("嘸蝦米字表（liu.cin）", systemImage: "doc.badge.arrow.up").font(Typo.h2)
-                        Text("OhMyBias 需要嘸蝦米的 .cin 字表檔才能運作。如果你有購買嘸蝦米輸入法，請從安裝目錄中找到 liu.cin，點擊下方按鈕匯入。字表僅在本機編譯使用，不會上傳。")
+                        Text("OhMyBias 需要嘸蝦米的 .cin 字表檔才能運作。如果你有購買嘸蝦米輸入法，請從安裝目錄中找到 liu.cin，點擊下方按鈕匯入。字表匯入會建置緩存以加速查詢。")
                             .font(Typo.body).foregroundStyle(.secondary)
                         HStack {
                             Button {
@@ -105,6 +105,52 @@ struct InputTab: View {
                     ForEach(inputOptions) { opt in
                         toggleCard(opt)
                     }
+                }
+
+                // Key sound settings
+                SectionDivider()
+                GroupBox {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("按鍵音效", systemImage: "speaker.wave.2.fill").font(Typo.h2)
+                        Toggle(isOn: $store.keySoundEnabled) {
+                            Text("啟用按鍵音效")
+                        }
+                        HStack {
+                            Text("音量")
+                            Slider(value: Binding(get: { store.keySoundVolume }, set: { v in store.keySoundVolume = v; SoundManager.shared.setVolume(Float(v)) }), in: 0...1)
+                        }
+                        HStack {
+                            Button("選擇音效檔案⋯") {
+                                NSApp.activate(ignoringOtherApps: true)
+                                let panel = NSOpenPanel()
+                                panel.allowedContentTypes = [.wav, .aiff, .mp3, .m4a]
+                                panel.allowsOtherFileTypes = true
+                                panel.canChooseFiles = true
+                                panel.canChooseDirectories = false
+                                if panel.runModal() == .OK, let url = panel.url {
+                                    do {
+                                        let fm = FileManager.default
+                                        let appSup = try fm.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                                            .appendingPathComponent("OhMyBias/sounds", isDirectory: true)
+                                        try fm.createDirectory(at: appSup, withIntermediateDirectories: true)
+                                        let dest = appSup.appendingPathComponent(url.lastPathComponent)
+                                        if !fm.fileExists(atPath: dest.path) {
+                                            try fm.copyItem(at: url, to: dest)
+                                        }
+                                        try SoundManager.shared.loadSound(id: "key", url: dest)
+                                        store.keySoundFile = dest.path
+                                    } catch {
+                                        // ignore for now
+                                    }
+                                }
+                            }
+                            if let path = store.keySoundFile {
+                                Text((path as NSString).lastPathComponent).font(.caption).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                        }
+                    }
+                    .padding(8)
                 }
 
                 // ── 固定排序 ──

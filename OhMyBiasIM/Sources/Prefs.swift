@@ -114,21 +114,25 @@ struct OhMyBiasPrefs {
         set { defaults.set(newValue, forKey: "punctuationPairing") }
     }
 
-    /// Debug mode: write detailed logs to AppConstants.sharedDir/debug.log
-    static var debugMode: Bool {
-        get { defaults.object(forKey: "debugMode") as? Bool ?? false }
-        set { defaults.set(newValue, forKey: "debugMode") }
+    // MARK: - Key sound
+
+    /// 是否啟用按鍵音效
+    static var keySoundEnabled: Bool {
+        get { defaults.object(forKey: "keySoundEnabled") as? Bool ?? false }
+        set { defaults.set(newValue, forKey: "keySoundEnabled") }
     }
 
-    /// 候選字高對比模式：加粗 + 文字陰影
-    static var highContrast: Bool {
-        get { defaults.object(forKey: "highContrast") as? Bool ?? false }
-        set { defaults.set(newValue, forKey: "highContrast") }
+    /// 按鍵音效音量 0.0 - 1.0
+    static var keySoundVolume: Float {
+        get { defaults.object(forKey: "keySoundVolume") as? Float ?? 0.8 }
+        set { defaults.set(newValue, forKey: "keySoundVolume") }
     }
 
-    /// 同步資料夾（nil = 不開啟，使用本機 AppConstants.sharedDir）— 同步 tables/*.txt
-    static var syncFolder: String? {
-        get { defaults.string(forKey: "syncFolder") }
-        set { defaults.set(newValue, forKey: "syncFolder") }
+    /// 自訂按鍵音效檔案路徑（可為 nil）
+    static var keySoundFile: String? {
+        get { defaults.string(forKey: "keySoundFile") }
+        set { defaults.set(newValue, forKey: "keySoundFile") }
     }
+
+    // MARK: - Mode toast
 }

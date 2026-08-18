@@ -86,6 +86,23 @@ import Foundation
         set { withMutation(keyPath: \.syncFolder) { ud.set(newValue, forKey: "syncFolder") }; postChange() }
     }
 
+    // MARK: - Key sound
+
+    var keySoundEnabled: Bool {
+        get { access(keyPath: \.keySoundEnabled); return ud.object(forKey: "keySoundEnabled") as? Bool ?? false }
+        set { withMutation(keyPath: \.keySoundEnabled) { ud.set(newValue, forKey: "keySoundEnabled") }; postChange() }
+    }
+
+    var keySoundVolume: Double {
+        get { access(keyPath: \.keySoundVolume); return ud.object(forKey: "keySoundVolume") as? Double ?? 0.8 }
+        set { withMutation(keyPath: \.keySoundVolume) { ud.set(newValue, forKey: "keySoundVolume") }; postChange() }
+    }
+
+    var keySoundFile: String? {
+        get { access(keyPath: \.keySoundFile); return ud.string(forKey: "keySoundFile") }
+        set { withMutation(keyPath: \.keySoundFile) { ud.set(newValue, forKey: "keySoundFile") }; postChange() }
+    }
+
     // MARK: - Onboarding
 
     var hasSeenWelcome: Bool {
