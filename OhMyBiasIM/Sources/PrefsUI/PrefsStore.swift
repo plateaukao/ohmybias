@@ -81,6 +81,10 @@ import Foundation
         get { access(keyPath: \.punctuationPairing); return ud.object(forKey: "punctuationPairing") as? Bool ?? false }
         set { withMutation(keyPath: \.punctuationPairing) { ud.set(newValue, forKey: "punctuationPairing") }; postChange() }
     }
+    var englishTrailingSpace: Bool {
+        get { access(keyPath: \.englishTrailingSpace); return ud.object(forKey: "englishTrailingSpace") as? Bool ?? false }
+        set { withMutation(keyPath: \.englishTrailingSpace) { ud.set(newValue, forKey: "englishTrailingSpace") }; postChange() }
+    }
     var syncFolder: String? {
         get { access(keyPath: \.syncFolder); return ud.string(forKey: "syncFolder") }
         set { withMutation(keyPath: \.syncFolder) { ud.set(newValue, forKey: "syncFolder") }; postChange() }

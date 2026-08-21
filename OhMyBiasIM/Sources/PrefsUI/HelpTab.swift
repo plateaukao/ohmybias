@@ -1,6 +1,15 @@
 import SwiftUI
 
 struct HelpTab: View {
+    /// 顯示用版本字串：CFBundleShortVersionString（build 號不同時附上）
+    static var versionText: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "?"
+        guard var build = info?["CFBundleVersion"] as? String, build != short else { return short }
+        if build.hasPrefix(short + ".") { build.removeFirst(short.count + 1) }
+        return "\(short)（build \(build)）"
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -136,6 +145,11 @@ struct HelpTab: View {
 
                 Text("本程式碼以 MIT 授權釋出。各語料依其原始授權條款使用。")
                     .font(Typo.caption).foregroundStyle(.secondary)
+
+                HStack(spacing: 4) {
+                    Text("版本：").font(Typo.caption).foregroundStyle(.secondary)
+                    Text(Self.versionText).font(Typo.bodyMono).foregroundStyle(.secondary)
+                }
 
                 HStack(spacing: 4) {
                     Text("原始碼：").font(Typo.caption).foregroundStyle(.secondary)

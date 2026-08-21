@@ -7,6 +7,7 @@ protocol IMEPreferences {
     var fuzzyMatch: Bool { get }
     var showCodeHint: Bool { get }
     var punctuationPairing: Bool { get }
+    var englishTrailingSpace: Bool { get }
 }
 
 /// Bridges the static OhMyBiasPrefs into an instance conforming to IMEPreferences.
@@ -16,4 +17,5 @@ final class DefaultPreferences: IMEPreferences {
     var fuzzyMatch: Bool { OhMyBiasPrefs.fuzzyMatch }
     var showCodeHint: Bool { OhMyBiasPrefs.showCodeHint }
     var punctuationPairing: Bool { OhMyBiasPrefs.punctuationPairing }
+    var englishTrailingSpace: Bool { OhMyBiasPrefs.englishTrailingSpace }
 }

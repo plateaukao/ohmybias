@@ -204,7 +204,7 @@ final class InputEngine {
         }
         // 無候選字：把打到一半的字母原樣送出（無蝦米下快速輸入英文）
         if _currentCandidates.isEmpty {
-            _commitText(_composing); return
+            _commitText(_englishOutput(_composing)); return
         }
         _commitText(_currentCandidates[0])
     } }
@@ -275,7 +275,7 @@ final class InputEngine {
             return
         }
         if _composing.isEmpty { return }
-        _commitText(_composing)
+        _commitText(_englishOutput(_composing))
     } }
 
     func handleEscape() { sync {
@@ -833,6 +833,14 @@ final class InputEngine {
     private static let punctuationPairs: [String: String] = [
         "「": "」", "（": "）", "『": "』", "【": "】", "《": "》", "〈": "〉",
     ]
+
+    /// 英文直印（無候選字按空白／按 Enter 送出原碼）時，依偏好在尾端補一個空白。
+    /// 只對純英文字母的組字串生效，標點、萬用字元等不補。
+    private func _englishOutput(_ text: String) -> String {
+        guard prefs.englishTrailingSpace, !text.isEmpty,
+              text.allSatisfy({ $0.isASCII && $0.isLetter }) else { return text }
+        return text + " "
+    }
 
     private func _commitText(_ text: String) {
         DebugLog.log("OhMyBiasKB: commitText='\(text)' composing='\(_composing)' sameSound=\(_isSameSoundMode ? 1 : 0)")

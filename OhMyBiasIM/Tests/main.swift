@@ -471,6 +471,61 @@ func testIntegrationOverflowAutoCommitStillWorks() {
     checkEqual(engine.composing, "a", "超長後以新鍵重新組字")
 }
 
+func testEnglishTrailingSpaceOnSpace() {
+    let engine = InputEngine(prefs: MockPreferences(englishTrailingSpace: true))
+    let mock = MockEngineDelegate()
+    engine.delegate = mock
+    let cinPath = makeTempCIN()
+    engine.cinTable.load(cinPath: cinPath)
+    try? FileManager.default.removeItem(atPath: cinPath)
+
+    for _ in 0..<5 { engine.handleLetter("z") }
+    engine.handleSpace()
+    checkEqual(mock.commits.first, "zzzzz ", "開啟補空白：無候選字按空白 → 字母＋空白")
+}
+
+func testEnglishTrailingSpaceOnEnter() {
+    let engine = InputEngine(prefs: MockPreferences(englishTrailingSpace: true))
+    let mock = MockEngineDelegate()
+    engine.delegate = mock
+    let cinPath = makeTempCIN()
+    engine.cinTable.load(cinPath: cinPath)
+    try? FileManager.default.removeItem(atPath: cinPath)
+
+    // 有候選字時按 Enter 一樣是英文直印 → 補空白
+    for ch in ["a", "b"] { engine.handleLetter(ch) }
+    engine.handleEnter()
+    checkEqual(mock.commits.first, "ab ", "開啟補空白：Enter 送出原碼 → 字母＋空白")
+}
+
+func testEnglishTrailingSpaceOffByDefault() {
+    let engine = InputEngine(prefs: MockPreferences())
+    let mock = MockEngineDelegate()
+    engine.delegate = mock
+    let cinPath = makeTempCIN()
+    engine.cinTable.load(cinPath: cinPath)
+    try? FileManager.default.removeItem(atPath: cinPath)
+
+    for _ in 0..<3 { engine.handleLetter("z") }
+    engine.handleSpace()
+    checkEqual(mock.commits.first, "zzz", "關閉補空白：維持原樣送出")
+}
+
+func testEnglishTrailingSpaceSkipsNonLetters() {
+    let engine = InputEngine(prefs: MockPreferences(englishTrailingSpace: true))
+    let mock = MockEngineDelegate()
+    engine.delegate = mock
+    let cinPath = makeTempCIN()
+    engine.cinTable.load(cinPath: cinPath)
+    try? FileManager.default.removeItem(atPath: cinPath)
+
+    // 含萬用字元／標點的組字串不是英文，不補空白
+    engine.handleLetter("z")
+    engine.handleWildcard()
+    engine.handleSpace()
+    checkEqual(mock.commits.first, "z*", "非純英文字母不補空白")
+}
+
 // Run all tests
 print("Running OhMyBiasIM tests...")
 testHarness()
@@ -505,6 +560,10 @@ testIntegrationSequentialCommits()
 testIntegrationNoCandidateKeepsComposing()
 testIntegrationSpaceCommitsRawWhenNoCandidate()
 testIntegrationOverflowAutoCommitStillWorks()
+testEnglishTrailingSpaceOnSpace()
+testEnglishTrailingSpaceOnEnter()
+testEnglishTrailingSpaceOffByDefault()
+testEnglishTrailingSpaceSkipsNonLetters()
 
 print("\n\(passed) passed, \(failed) failed")
 exit(failed > 0 ? 1 : 0)

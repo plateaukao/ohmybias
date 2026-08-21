@@ -114,6 +114,12 @@ struct OhMyBiasPrefs {
         set { defaults.set(newValue, forKey: "punctuationPairing") }
     }
 
+    /// 英文直印後自動補空白：無候選字按空白鍵、或按 Enter 送出原碼字母時，尾端加一個空白
+    static var englishTrailingSpace: Bool {
+        get { defaults.object(forKey: "englishTrailingSpace") as? Bool ?? false }
+        set { defaults.set(newValue, forKey: "englishTrailingSpace") }
+    }
+
     /// Debug mode: write detailed logs to AppConstants.sharedDir/debug.log
     static var debugMode: Bool {
         get { defaults.object(forKey: "debugMode") as? Bool ?? false }
