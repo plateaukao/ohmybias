@@ -223,26 +223,25 @@ class OhMyBiasInputController: IMKInputController {
         PrefsWindow.shared.show()
     }
 
-    private static var lastAppliedKeyboardLayout: String?
+    /// 這個 controller（＝這個 client app）已經套過的鍵盤佈局。
+    /// 從別的輸入法切回來時一律重套（對方可能改過佈局），app 之間切換就不必重複呼叫。
+    private var lastAppliedKeyboardLayout: String?
 
     override func activateServer(_ sender: Any!) {
         super.activateServer(sender)
         _ = Self.inputSourceObserver
+        let fromOtherIM = !Self.ohMyBiasWasActive
+        Self.ohMyBiasWasActive = true
         let targetLayout = "com.apple.keylayout.ABC"
-        if let client = sender as? IMKTextInput {
+        if let client = sender as? IMKTextInput,
+           fromOtherIM || lastAppliedKeyboardLayout != targetLayout {
             client.overrideKeyboard(withKeyboardNamed: targetLayout)
+            lastAppliedKeyboardLayout = targetLayout
         }
         if Self.cinTable.isEmpty && !Self.hasPromptedImport {
             Self.hasPromptedImport = true
             panel.showGuide("尚未匯入字表 — 右鍵狀態列圖示 → 偏好設定 → 匯入字表")
             DispatchQueue.main.async { Self.promptImportCIN() }
-        }
-        let fromOtherIM = !Self.ohMyBiasWasActive
-        Self.ohMyBiasWasActive = true
-        if fromOtherIM {
-            DispatchQueue.global(qos: .userInitiated).async {
-                _ = Self.cinTable.shortestCodesTable
-            }
         }
         Self.activeSession = self
         panel.onCandidateSelected = { [weak self] text in
@@ -363,18 +362,12 @@ class OhMyBiasInputController: IMKInputController {
             try FileManager.default.copyItem(at: src, to: URL(fileURLWithPath: dst))
             try? FileManager.default.removeItem(atPath: dst + ".cache")
             cinTable.reload()
-            // Pre-build lazy caches now to avoid lag on first keystroke
-            DispatchQueue.global(qos: .userInitiated).async {
-                _ = cinTable.shortestCodesTable
-                _ = cinTable.longestCodesTable
-                DebugLog.log("OhMyBiasIM: Pre-built code tables after import")
-            }
             hasPromptedImport = false
             showFirstUseTip = true
             DebugLog.log("OhMyBiasIM: Imported CIN table from \(src.path)")
             showImportAlert(
                 messageText: "字表匯入成功",
-                informativeText: "已匯入 \(cinTable.isEmpty ? 0 : cinTable.shortestCodesTable.count) 字。",
+                informativeText: "已匯入 \(cinTable.distinctCharCount) 字。",
                 style: .informational,
                 attachedTo: window
             )
@@ -426,9 +419,10 @@ extension OhMyBiasInputController {
         if let e = objc_getAssociatedObject(self, &Self._engineKey) as? InputEngine { return e }
         // IMK 每個 client app 各建一個 controller — pinnedStore 必須共用，
         // 否則每個 app 各開一條 SQLite 連線、,,PIN 也不會跨 app 生效
+        // 字表由 `static let cinTable` 的初始化器載一次就好 — 這裡不能再 reload()，
+        // 否則每換一個 app（＝每個 controller 第一次取 engine）就整表重載一次
         let e = InputEngine(cinTable: Self.cinTable, pinnedStore: Self.pinnedStore)
         e.delegate = self
-        e.loadTable()
         objc_setAssociatedObject(self, &Self._engineKey, e, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         return e
     }

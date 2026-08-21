@@ -2,6 +2,17 @@
 
 格式基於 [Keep a Changelog](https://keepachangelog.com/)。
 
+## 未發佈
+
+### 修正
+- **切換輸入法偶爾靜默失敗（heap corruption）** — `activateServer` 會一邊在背景執行緒建反查表、一邊在主執行緒重載同一個共用的 `CINTable`，兩邊同時讀寫同一批 Dictionary，把 heap freelist 寫壞（`BUG IN CLIENT OF LIBMALLOC` / SIGTRAP），輸入法 process 死在切換途中，系統退回英文、使用者得再按一次。`CINTable` 改成「不可變快照＋整份原子替換」：載入端在區域變數上組好完整快照再上鎖換掉，讀取端只在鎖內取出參考、其餘全在鎖外操作，建表不再擋按鍵路徑。
+- **每換一個 app 就整表重載一次** — IMK 每個 client app 各建一個 controller，其 `engine` getter 又呼叫 `InputEngine.loadTable()` → `cinTable.reload()`，而共用的 `static let cinTable` 初始化時已經載過。移除這條重載路徑（`InputEngine.loadTable()` 一併刪除），字表只在啟動、`,,RL`、匯入字表、以及偏好設定改擴充表時重載。
+- **偏好設定改擴充表沒有生效** — `info.plateaukao.ohmybias.reloadTables` 通知從來沒有人接收（以前靠上述「換 app 就重載」矇混過去）；改由 `AppDelegate` 明確接起來呼叫 `reloadTable()`。
+
+### 變更
+- **不再預先建立反查表** — 反查表只有注音／同音模式、簡碼／長碼模式、字碼提示會用到，一般打字完全不碰，卻在每次從別的輸入法切進來時就丟到背景整份重建（peak footprint 一度到 207 MB）。改為真的用到才建，並在匯入完成的訊息改用只掃一次碼表的字數統計。
+- **鍵盤佈局不再每次 activate 都重套** — 補回 `lastAppliedKeyboardLayout` 判斷（宣告了但從未使用）：從別的輸入法切回來時仍一律重套 ABC 佈局（對方可能改過），app 之間切換則跳過。
+
 ## [0.5.0] — 2026-08-21
 
 ### 新增

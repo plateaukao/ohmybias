@@ -116,12 +116,6 @@ final class InputEngine {
         _isEnglishMode ? "A" : (Self.modeLabels[_inputMode] ?? "繁中")
     }
 
-    // MARK: - Init
-
-    func loadTable() {
-        cinTable.reload()
-    }
-
     // MARK: - Public API (called by KeyboardViewController)
 
     func handleLetter(_ char: String) { sync {

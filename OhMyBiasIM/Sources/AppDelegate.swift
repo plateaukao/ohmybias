@@ -26,6 +26,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let ver = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
         DebugLog.log("OhMyBiasIM: build=\(ver)")
         Self.setUpUserDir()
+        Self.observeTableReload()
+    }
+
+    /// 偏好設定改了擴充表／匯入 .txt 之後會發這個通知。
+    /// 以前沒人收，靠「換 app 時 engine getter 又 reload 一次」矇混過去 —
+    /// 那條路已經拿掉了（會跟背景建表打架寫壞 heap），所以在這裡明確接起來。
+    private static func observeTableReload() {
+        DistributedNotificationCenter.default().addObserver(
+            forName: NSNotification.Name("info.plateaukao.ohmybias.reloadTables"),
+            object: nil, queue: .main
+        ) { _ in
+            OhMyBiasInputController.reloadTable()
+        }
     }
 
     /// 首次啟動建立使用者資料夾並部署預設檔（pkg 安裝以 root 執行，不碰使用者家目錄，
