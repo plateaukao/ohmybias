@@ -2,7 +2,7 @@
 
 格式基於 [Keep a Changelog](https://keepachangelog.com/)。
 
-## 未發佈
+## [0.6.0] — 2026-08-21
 
 ### 修正
 - **切換輸入法偶爾靜默失敗（heap corruption）** — `activateServer` 會一邊在背景執行緒建反查表、一邊在主執行緒重載同一個共用的 `CINTable`，兩邊同時讀寫同一批 Dictionary，把 heap freelist 寫壞（`BUG IN CLIENT OF LIBMALLOC` / SIGTRAP），輸入法 process 死在切換途中，系統退回英文、使用者得再按一次。`CINTable` 改成「不可變快照＋整份原子替換」：載入端在區域變數上組好完整快照再上鎖換掉，讀取端只在鎖內取出參考、其餘全在鎖外操作，建表不再擋按鍵路徑。
