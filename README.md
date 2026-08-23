@@ -11,7 +11,12 @@ macOS 嘸蝦米（Boshiamy）輸入法 — 純 Swift、零依賴、極簡、單�
 
 ## 安裝
 
-從 Release 下載 `OhMyBias-x.y.z.pkg`，雙擊安裝。安裝結尾建議登出再登入
+從 Release 下載對應機器的 pkg，雙擊安裝（需 macOS 14 Sonoma 以上）：
+
+- Apple Silicon（M 系列）：`OhMyBias-x.y.z-arm64.pkg`
+- Intel（2019 以後的 iMac 等）：`OhMyBias-x.y.z-x86_64.pkg`
+
+裝錯架構 Installer 會直接擋下。安裝結尾建議登出再登入
 （也可以稍後），然後到 系統設定 → 鍵盤 → 輸入方式 → + → 繁體中文 → 無米蝦。
 首次切換時會引導匯入你的 `liu.cin` 字表（需自備合法取得的嘸蝦米字表）。
 
@@ -19,9 +24,9 @@ macOS 嘸蝦米（Boshiamy）輸入法 — 純 Swift、零依賴、極簡、單�
 
 ```bash
 ./ohmybias.sh                  # 編譯 + 安裝（開發用，需要管理員密碼）
-./ohmybias.sh build            # 只編譯（無 Xcode 專案，raw swiftc）
+./ohmybias.sh build            # 只編譯（無 Xcode 專案，raw swiftc；ARCH=x86_64 可交叉編譯）
 OhMyBiasIM/Tests/run_tests.sh  # 單元測試
-./release.sh                   # 簽章 + 公證 → OhMyBias-x.y.z.pkg
+./release.sh                   # 簽章 + 公證 → OhMyBias-x.y.z-{arm64,x86_64}.pkg（可只給一種架構）
 ```
 
 單一 app：**OhMyBiasIM.app**（InputMethodKit 輸入法＋內建 SwiftUI 設定視窗，

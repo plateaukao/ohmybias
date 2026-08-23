@@ -3,7 +3,8 @@
     <title>OhMyBias 米 輸入法</title>
     <welcome file="welcome.html"/>
     <conclusion file="conclusion.html"/>
-    <options customize="never" hostArchitectures="arm64"/>
+    <!-- @ARCH@ 由 release.sh 代入（arm64 / x86_64），兩種架構各出一個 pkg -->
+    <options customize="never" hostArchitectures="@ARCH@"/>
     <allowed-os-versions><os-version min="14.0"/></allowed-os-versions>
     <domains enable_localSystem="true"/>
     <choices-outline>

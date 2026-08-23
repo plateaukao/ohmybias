@@ -2,6 +2,11 @@
 
 格式基於 [Keep a Changelog](https://keepachangelog.com/)。
 
+## 未發佈
+
+### 新增
+- **Intel 版 pkg** — `release.sh` 改為 arm64 與 x86_64 各出一個 pkg（`OhMyBias-x.y.z-arm64.pkg`／`-x86_64.pkg`），pkg 的 `hostArchitectures` 對應架構，裝錯機器 Installer 會直接擋下。程式碼沒有任何架構相關分支，Intel 版只是換編譯目標；0.6.0 的 Intel 版已用同一份程式碼補上。系統需求仍為 macOS 14（2019 以後的 Intel iMac 可用）。
+
 ## [0.6.0] — 2026-08-21
 
 ### 修正

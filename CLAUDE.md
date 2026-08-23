@@ -14,10 +14,11 @@ OhMyBias 米 — macOS 嘸蝦米（Boshiamy）輸入法，Yabomish 的極簡分�
 ./ohmybias.sh            # 編譯 + 安裝（開發用，sudo）
 ./ohmybias.sh build      # 只編譯
 ./ohmybias.sh uninstall  # 移除（互動確認）
-./release.sh             # 簽 app + pkgbuild/productbuild + 簽 pkg + 公證 + staple → OhMyBias-x.y.z.pkg
+./release.sh             # 簽 app + pkgbuild/productbuild + 簽 pkg + 公證 + staple → OhMyBias-x.y.z-{arm64,x86_64}.pkg
+./release.sh x86_64      # 只出一種架構
 ```
 
-編譯目標 `arm64-apple-macos14.0`（Apple Silicon、macOS 14+）。公證用 keychain profile `notarytool`。打包必須經 component plist 把 `BundleIsRelocatable` 設 false（release.sh 已處理，勿改回 `pkgbuild --component`）— 否則機器上若有同 bundle id 的副本（開發機的 `build/`），Installer 會把 payload relocate 去蓋那份，`/Library/Input Methods` 裝不進去。
+編譯目標 `${ARCH}-apple-macos14.0`，`ARCH` 環境變數 = `arm64`（Apple Silicon）或 `x86_64`（Intel），預設本機架構；macOS 14+。release 兩種架構各出一個 pkg（不做 universal binary），`pkg/distribution.xml` 的 `hostArchitectures="@ARCH@"` 由 release.sh 代入，裝錯架構 Installer 會擋下。程式碼無任何架構分支（`liu.bin` 格式固定 little-endian），Intel 版只是換編譯目標。公證用 keychain profile `notarytool`。打包必須經 component plist 把 `BundleIsRelocatable` 設 false（release.sh 已處理，勿改回 `pkgbuild --component`）— 否則機器上若有同 bundle id 的副本（開發機的 `build/`），Installer 會把 payload relocate 去蓋那份，`/Library/Input Methods` 裝不進去。
 
 單一版本、無模式選項。版本號取自 CHANGELOG.md 第一個 `## [x.y.z]`（改版＝加 CHANGELOG 條目）。已發佈版本的條目不可再改；發佈後的變更寫在最上方的 `## 未發佈` 段（標題**不加方括號**，否則會被版本號解析抓走），發新版時再改成 `## [x.y.z]`。發佈給使用者的是 **pkg**（`pkg/` 內有 distribution.xml、postinstall、welcome/conclusion 頁；不設 `onConclusion` — `RequireLogout` 會讓結尾只剩強制「登出」鈕，登出僅作為 conclusion 頁的建議）。release 需要 Developer ID Application＋Installer 兩張憑證。簽章後的 bundle 不可再修改。使用者資料夾由 app 啟動時建立（`AppDelegate.setUpUserDir`），pkg postinstall 不碰使用者家目錄。
 

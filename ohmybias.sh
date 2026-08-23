@@ -8,6 +8,7 @@ cd "$ROOT"
 #       ./ohmybias.sh build      只編譯
 #       ./ohmybias.sh install    只安裝（已編譯過）
 #       ./ohmybias.sh uninstall  移除
+# 環境變數 ARCH=arm64|x86_64 指定編譯架構（預設＝本機架構；release.sh 兩種各編一次）
 
 G='\033[32m'; Y='\033[33m'; R='\033[31m'; C='\033[36m'; N='\033[0m'
 ok()   { printf "${G}[OK] %s${N}\n" "$1"; }
@@ -21,6 +22,8 @@ IM_APP="$IM_BUILD/OhMyBiasIM.app"
 INSTALL_DIR="/Library/Input Methods"
 USER_DIR="$HOME/Library/Application Support/OhMyBias"
 IM_BUNDLE_ID="info.plateaukao.inputmethod.ohmybias"
+ARCH="${ARCH:-$(uname -m)}"
+case "$ARCH" in arm64|x86_64) ;; *) err "ARCH 必須是 arm64 或 x86_64（目前：$ARCH）";; esac
 
 check_xcode() {
     if ! xcode-select -p &>/dev/null; then
@@ -31,7 +34,7 @@ check_xcode() {
 }
 
 build_im() {
-    printf "${C}> 編譯輸入法...${N}\n"
+    printf "${C}> 編譯輸入法（$ARCH）...${N}\n"
     rm -rf "$IM_BUILD"
     mkdir -p "$IM_APP/Contents/MacOS" "$IM_APP/Contents/Resources"
 
@@ -54,12 +57,12 @@ build_im() {
     echo -n "APPL????" > "$IM_APP/Contents/PkgInfo"
 
     swiftc -module-name OhMyBiasIM \
-        -target arm64-apple-macos14.0 \
+        -target "${ARCH}-apple-macos14.0" \
         -sdk "$(xcrun --show-sdk-path)" -O \
         -o "$IM_APP/Contents/MacOS/OhMyBiasIM" \
         $(find "$IM_SRC" -name "*.swift" | sort)
 
-    ok "OhMyBiasIM.app (build $STAMP.$HASH, $(du -sh "$IM_APP" | cut -f1))"
+    ok "OhMyBiasIM.app ($ARCH, build $STAMP.$HASH, $(du -sh "$IM_APP" | cut -f1))"
 }
 
 do_install() {
