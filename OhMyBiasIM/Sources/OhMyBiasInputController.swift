@@ -244,6 +244,8 @@ class OhMyBiasInputController: IMKInputController {
             DispatchQueue.main.async { Self.promptImportCIN() }
         }
         Self.activeSession = self
+        if let client = sender as? (NSObjectProtocol & IMKTextInput) { engineClient = client }
+        Self.registerToggleHotKey()
         panel.onCandidateSelected = { [weak self] text in
             guard let self else { return }
             let idx = self.engine.currentCandidates.firstIndex(of: text) ?? 0
@@ -258,7 +260,9 @@ class OhMyBiasInputController: IMKInputController {
         if Self.showFirstUseTip {
             Self.showFirstUseTip = false
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                self?.showModeToast("空白鍵送字 ｜ Shift 切英文 ｜ ,,H 說明")
+                let toggle = OhMyBiasPrefs.shiftToggleEnglish ? "Shift"
+                    : (OhMyBiasPrefs.englishToggleShortcut?.displayString ?? "Shift")
+                self?.showModeToast("空白鍵送字 ｜ \(toggle) 切英文 ｜ ,,H 說明")
             }
         }
     }
@@ -287,8 +291,34 @@ class OhMyBiasInputController: IMKInputController {
         }
         panel.hide()
         Self.activeSession = nil
+        GlobalHotKey.shared.register(nil)
         Self.lastDeactivateTime = Date()
         super.deactivateServer(sender)
+    }
+
+    // MARK: - 中／英切換全域快速鍵
+
+    private static var hotKeyObserverInstalled = false
+
+    /// 無米蝦成為目前輸入方式時註冊全域快速鍵（見 GlobalHotKey 的說明）；偏好改了也重新註冊。
+    private static func registerToggleHotKey() {
+        if !hotKeyObserverInstalled {
+            hotKeyObserverInstalled = true
+            GlobalHotKey.shared.onPressed = { activeSession?.toggleEnglishViaShortcut() }
+            DistributedNotificationCenter.default().addObserver(
+                forName: .init("info.plateaukao.ohmybias.prefsChanged"), object: nil, queue: .main
+            ) { _ in
+                if activeSession != nil { GlobalHotKey.shared.register(OhMyBiasPrefs.englishToggleShortcut) }
+            }
+        }
+        GlobalHotKey.shared.register(OhMyBiasPrefs.englishToggleShortcut)
+    }
+
+    /// 自訂快速鍵觸發的中／英切換（全域 hot key 與 handle() 內比對共用）
+    func toggleEnglishViaShortcut() {
+        newEngineShiftUsed = true   // 組合裡若含 Shift，放開時不能再算成單擊
+        if !engine.composing.isEmpty { engine.handleEscape() }
+        engine.toggleEnglishMode()
     }
 
     // MARK: - CIN Import
@@ -436,6 +466,13 @@ extension OhMyBiasInputController {
 
         let keyCode = event.keyCode
         let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+
+        // 使用者自訂的中／英切換快速鍵 — 正常情況全域 hot key 已在 app 之前攔下、這裡不會看到；
+        // 這是 hot key 註冊失敗（被別的 app 佔走）時的備援。放在最前面，任何模式都吃得到。
+        if let sc = OhMyBiasPrefs.englishToggleShortcut, sc.matches(event) {
+            toggleEnglishViaShortcut()
+            return true
+        }
 
         if flags.contains(.command) || flags.contains(.control) || flags.contains(.option) {
             return false
@@ -649,16 +686,25 @@ extension OhMyBiasInputController {
     }
 
     private func handleNewEngineFlagsChanged(_ event: NSEvent) -> Bool {
-        let shiftDown = event.modifierFlags.contains(.shift)
+        let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        let shiftDown = flags.contains(.shift)
+        let otherDown = !flags.intersection([.command, .control, .option]).isEmpty
         if shiftDown {
-            newEngineLastShiftDown = event.timestamp
-            newEngineShiftUsed = false
-        } else if newEngineLastShiftDown > 0 {
-            if event.timestamp - newEngineLastShiftDown < 0.3 && !newEngineShiftUsed {
+            if otherDown {
+                // Shift 與 ⌘⌃⌥ 並用（⌘⇧S、自訂快速鍵 ⌃⇧Space⋯）→ 不是單擊；
+                // 之後就算先放開 ⌘ 只剩 Shift，也不能重新起算
+                newEngineShiftUsed = true
+            } else if newEngineLastShiftDown == 0 && !newEngineShiftUsed {
+                newEngineLastShiftDown = event.timestamp
+            }
+        } else {
+            if newEngineLastShiftDown > 0 && event.timestamp - newEngineLastShiftDown < 0.3
+                && !newEngineShiftUsed && OhMyBiasPrefs.shiftToggleEnglish {
                 if !engine.composing.isEmpty { engine.handleEscape() }
                 engine.toggleEnglishMode()
             }
             newEngineLastShiftDown = 0
+            newEngineShiftUsed = false
         }
         return false
     }

@@ -108,6 +108,11 @@ struct InputTab: View {
                     }
                 }
 
+                // ── 中／英切換 ──
+                SectionDivider()
+                Label("中／英文切換", systemImage: "globe").font(Typo.h2)
+                EnglishToggleSection(store: store)
+
                 // ── 固定排序 ──
                 SectionDivider()
                 Label("固定同碼字排序", systemImage: "pin.fill").font(Typo.h2)

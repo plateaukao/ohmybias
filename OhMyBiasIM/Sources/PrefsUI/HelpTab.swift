@@ -50,7 +50,7 @@ struct HelpTab: View {
                 ])
 
                 guide("中英文切換", icon: "globe", steps: [
-                    "單擊 Shift → 切換中／英文",
+                    "單擊 Shift → 切換中／英文（可在「輸入」分頁關閉或另設快速鍵）",
                     "按住 Shift → 暫時英文，放開回中文",
                     "Shift + Space → 全形空白",
                     ",, + Space → 全形空白（另一種方式）",

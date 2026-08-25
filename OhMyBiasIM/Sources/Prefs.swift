@@ -120,6 +120,23 @@ struct OhMyBiasPrefs {
         set { defaults.set(newValue, forKey: "englishTrailingSpace") }
     }
 
+    // MARK: - 英文模式切換
+
+    /// 單擊 Shift 切換中／英文（預設開）
+    static var shiftToggleEnglish: Bool {
+        get { defaults.object(forKey: "shiftToggleEnglish") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "shiftToggleEnglish") }
+    }
+
+    /// 另外指定的中／英切換快速鍵（nil = 未設定）
+    static var englishToggleShortcut: KeyShortcut? {
+        get { KeyShortcut(dict: defaults.dictionary(forKey: "englishToggleShortcut")) }
+        set {
+            if let s = newValue { defaults.set(s.dict, forKey: "englishToggleShortcut") }
+            else { defaults.removeObject(forKey: "englishToggleShortcut") }
+        }
+    }
+
     /// Debug mode: write detailed logs to AppConstants.sharedDir/debug.log
     static var debugMode: Bool {
         get { defaults.object(forKey: "debugMode") as? Bool ?? false }

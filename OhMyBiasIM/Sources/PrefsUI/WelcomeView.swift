@@ -40,7 +40,7 @@ struct WelcomeView: View {
                     icon: "command",
                     title: "常用快捷鍵",
                     lines: [
-                        "Shift 單擊　　切換中／英文",
+                        "Shift 單擊　　切換中／英文（可另設快速鍵）",
                         "';　　　　　　注音反查模式",
                         "Shift+Space　全形空白",
                         "Shift+*　　　萬用字元",

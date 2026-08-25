@@ -85,6 +85,20 @@ import Foundation
         get { access(keyPath: \.englishTrailingSpace); return ud.object(forKey: "englishTrailingSpace") as? Bool ?? false }
         set { withMutation(keyPath: \.englishTrailingSpace) { ud.set(newValue, forKey: "englishTrailingSpace") }; postChange() }
     }
+    var shiftToggleEnglish: Bool {
+        get { access(keyPath: \.shiftToggleEnglish); return ud.object(forKey: "shiftToggleEnglish") as? Bool ?? true }
+        set { withMutation(keyPath: \.shiftToggleEnglish) { ud.set(newValue, forKey: "shiftToggleEnglish") }; postChange() }
+    }
+    var englishToggleShortcut: KeyShortcut? {
+        get { access(keyPath: \.englishToggleShortcut); return KeyShortcut(dict: ud.dictionary(forKey: "englishToggleShortcut")) }
+        set {
+            withMutation(keyPath: \.englishToggleShortcut) {
+                if let s = newValue { ud.set(s.dict, forKey: "englishToggleShortcut") }
+                else { ud.removeObject(forKey: "englishToggleShortcut") }
+            }
+            postChange()
+        }
+    }
     var syncFolder: String? {
         get { access(keyPath: \.syncFolder); return ud.string(forKey: "syncFolder") }
         set { withMutation(keyPath: \.syncFolder) { ud.set(newValue, forKey: "syncFolder") }; postChange() }
