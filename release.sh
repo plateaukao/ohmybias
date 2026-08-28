@@ -23,7 +23,11 @@ KEYCHAIN_PROFILE="notarytool"
 IM_APP="$ROOT/OhMyBiasIM/build/OhMyBiasIM.app"
 VER=$(grep -m1 '^## \[' "$ROOT/CHANGELOG.md" | sed 's/.*\[\(.*\)\].*/\1/')
 
-ARCHES="${1:-arm64 x86_64}"
+# 本機架構排最後：每種架構都編進同一個 build/，跑完時 build/ 就是本機版，
+# 之後 ./ohmybias.sh install 才不會把另一種架構裝進 /Library/Input Methods
+NATIVE="$(uname -m)"
+case "$NATIVE" in arm64) OTHER=x86_64;; *) OTHER=arm64;; esac
+ARCHES="${1:-$OTHER $NATIVE}"
 for a in $ARCHES; do
     case "$a" in arm64|x86_64) ;; *) echo "[ERR] 架構只能是 arm64 或 x86_64：$a"; exit 1;; esac
 done
@@ -93,11 +97,6 @@ release_arch() {
 
 OUTS=()
 for a in $ARCHES; do release_arch "$a"; done
-
-# build/ 此時是最後一種架構（x86_64）的 binary；重編回本機架構，
-# 免得之後 ./ohmybias.sh install 把 Intel 版裝進 /Library/Input Methods
-echo "==> 重編本機架構（$(uname -m)）供開發安裝用..."
-ARCH="$(uname -m)" "$ROOT/ohmybias.sh" build > /dev/null
 
 echo ""
 echo "==> 完成！"
