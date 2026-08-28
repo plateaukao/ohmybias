@@ -269,7 +269,8 @@ final class InputEngine {
             return
         }
         if _composing.isEmpty { return }
-        _commitText(_englishOutput(_composing))
+        // Enter 送出原碼：不補空白（補空白只對空白鍵直印生效）
+        _commitText(_composing)
     } }
 
     func handleEscape() { sync {
@@ -828,8 +829,8 @@ final class InputEngine {
         "「": "」", "（": "）", "『": "』", "【": "】", "《": "》", "〈": "〉",
     ]
 
-    /// 英文直印（無候選字按空白／按 Enter 送出原碼）時，依偏好在尾端補一個空白。
-    /// 只對純英文字母的組字串生效，標點、萬用字元等不補。
+    /// 英文直印（無候選字按空白鍵送出原碼）時，依偏好在尾端補一個空白。
+    /// 只對純英文字母的組字串生效，標點、萬用字元等不補；按 Enter 送出原碼不經此處、不補空白。
     private func _englishOutput(_ text: String) -> String {
         guard prefs.englishTrailingSpace, !text.isEmpty,
               text.allSatisfy({ $0.isASCII && $0.isLetter }) else { return text }

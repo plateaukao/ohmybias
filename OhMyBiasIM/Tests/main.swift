@@ -492,10 +492,14 @@ func testEnglishTrailingSpaceOnEnter() {
     engine.cinTable.load(cinPath: cinPath)
     try? FileManager.default.removeItem(atPath: cinPath)
 
-    // 有候選字時按 Enter 一樣是英文直印 → 補空白
+    // 按 Enter 送出原碼不補空白（只有空白鍵直印才補）
     for ch in ["a", "b"] { engine.handleLetter(ch) }
     engine.handleEnter()
-    checkEqual(mock.commits.first, "ab ", "開啟補空白：Enter 送出原碼 → 字母＋空白")
+    checkEqual(mock.commits.first, "ab", "開啟補空白：Enter 送出原碼 → 不補空白")
+    mock.commits.removeAll()
+    for _ in 0..<5 { engine.handleLetter("z") }
+    engine.handleEnter()
+    checkEqual(mock.commits.first, "zzzzz", "開啟補空白：無候選字按 Enter → 不補空白")
 }
 
 func testEnglishTrailingSpaceOffByDefault() {
