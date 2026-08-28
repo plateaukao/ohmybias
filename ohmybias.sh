@@ -67,6 +67,9 @@ build_im() {
 
 do_install() {
     [ -d "$IM_APP" ] || err "請先執行 ./ohmybias.sh build"
+    # release.sh 會把 build/ 留成最後一種架構（x86_64）；裝到本機前先確認架構相符
+    local built; built="$(lipo -archs "$IM_APP/Contents/MacOS/OhMyBiasIM" 2>/dev/null || true)"
+    [ "$built" = "$ARCH" ] || err "build/ 是 $built 版、本機是 $ARCH，請改跑 ./ohmybias.sh 重編再安裝"
     printf "${C}> 安裝輸入法（需要管理員密碼）...${N}\n"
     killall OhMyBiasIM 2>/dev/null || true; sleep 1
 

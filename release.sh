@@ -94,6 +94,11 @@ release_arch() {
 OUTS=()
 for a in $ARCHES; do release_arch "$a"; done
 
+# build/ 此時是最後一種架構（x86_64）的 binary；重編回本機架構，
+# 免得之後 ./ohmybias.sh install 把 Intel 版裝進 /Library/Input Methods
+echo "==> 重編本機架構（$(uname -m)）供開發安裝用..."
+ARCH="$(uname -m)" "$ROOT/ohmybias.sh" build > /dev/null
+
 echo ""
 echo "==> 完成！"
 for o in "${OUTS[@]}"; do
