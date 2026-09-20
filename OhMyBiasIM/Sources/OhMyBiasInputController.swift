@@ -64,6 +64,8 @@ class OhMyBiasInputController: IMKInputController {
     private static let pinnedStore = PinnedStore()
     private static weak var activeSession: OhMyBiasInputController?
     private static var lastDeactivateTime: Date = .distantPast
+    /// 每個 client 各有引擎，但中／英文選擇共用同一份狀態，不依賴啟用回呼複製。
+    private static let languageState = InputLanguageState()
     private var lastCommittedLength: Int = 0
     private static var hasPromptedImport = false
     private static var showFirstUseTip = false
@@ -245,6 +247,8 @@ class OhMyBiasInputController: IMKInputController {
         }
         Self.activeSession = self
         if let client = sender as? (NSObjectProtocol & IMKTextInput) { engineClient = client }
+        newEngineLastShiftDown = 0
+        newEngineShiftUsed = false
         Self.registerToggleHotKey()
         panel.onCandidateSelected = { [weak self] text in
             guard let self else { return }
@@ -268,6 +272,8 @@ class OhMyBiasInputController: IMKInputController {
     }
 
     override func deactivateServer(_ sender: Any!) {
+        newEngineLastShiftDown = 0
+        newEngineShiftUsed = false
         guard Self.activeSession === self else {
             super.deactivateServer(sender)
             return
@@ -451,7 +457,8 @@ extension OhMyBiasInputController {
         // 否則每個 app 各開一條 SQLite 連線、,,PIN 也不會跨 app 生效
         // 字表由 `static let cinTable` 的初始化器載一次就好 — 這裡不能再 reload()，
         // 否則每換一個 app（＝每個 controller 第一次取 engine）就整表重載一次
-        let e = InputEngine(cinTable: Self.cinTable, pinnedStore: Self.pinnedStore)
+        let e = InputEngine(cinTable: Self.cinTable, pinnedStore: Self.pinnedStore,
+                            languageState: Self.languageState)
         e.delegate = self
         objc_setAssociatedObject(self, &Self._engineKey, e, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         return e

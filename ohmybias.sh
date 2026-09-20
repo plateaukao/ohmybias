@@ -56,9 +56,9 @@ build_im() {
     done
     echo -n "APPL????" > "$IM_APP/Contents/PkgInfo"
 
-    swiftc -module-name OhMyBiasIM \
+    xcrun --sdk macosx swiftc -module-name OhMyBiasIM \
         -target "${ARCH}-apple-macos14.0" \
-        -sdk "$(xcrun --show-sdk-path)" -O \
+        -sdk "$(xcrun --sdk macosx --show-sdk-path)" -O \
         -o "$IM_APP/Contents/MacOS/OhMyBiasIM" \
         $(find "$IM_SRC" -name "*.swift" | sort)
 

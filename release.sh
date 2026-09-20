@@ -67,7 +67,9 @@ release_arch() {
     mkdir "$WORK/root"
     ditto "$IM_APP" "$WORK/root/OhMyBiasIM.app"
     pkgbuild --analyze --root "$WORK/root" "$WORK/component.plist"
-    /usr/libexec/PlistBuddy -c 'Set :0:BundleIsRelocatable false' "$WORK/component.plist"
+    # 新版 pkgbuild 可能省略此 key；有值就改寫，沒有就明確新增。
+    /usr/libexec/PlistBuddy -c 'Set :0:BundleIsRelocatable false' "$WORK/component.plist" 2>/dev/null || \
+        /usr/libexec/PlistBuddy -c 'Add :0:BundleIsRelocatable bool false' "$WORK/component.plist"
     pkgbuild --root "$WORK/root" \
         --component-plist "$WORK/component.plist" \
         --install-location "/Library/Input Methods" \

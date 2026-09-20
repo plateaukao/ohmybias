@@ -9,10 +9,10 @@ SOURCES=$(find Sources Sources/Shared -maxdepth 1 -name '*.swift' | grep -Ev "$E
 TEST_SOURCES=$(find Tests -name '*.swift' | sort)
 
 echo "Compiling test runner..."
-swiftc \
+xcrun --sdk macosx swiftc \
     -module-name OhMyBiasTests \
     -target arm64-apple-macos14.0 \
-    -sdk "$(xcrun --show-sdk-path)" \
+    -sdk "$(xcrun --sdk macosx --show-sdk-path)" \
     -framework Foundation \
     -framework AppKit \
     -framework Cocoa \

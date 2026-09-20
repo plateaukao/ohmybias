@@ -22,6 +22,7 @@ final class InputEngine {
     private let ranker: CandidateRanker
     private let zhuyinLookup: ZhuyinLookup
     private let prefs: IMEPreferences
+    private let languageState: InputLanguageState
     private let lock = NSRecursiveLock()
 
     private func sync<T>(_ body: () -> T) -> T {
@@ -32,11 +33,13 @@ final class InputEngine {
     init(cinTable: CINTable? = nil,
          pinnedStore: PinnedStore? = nil,
          zhuyinLookup: ZhuyinLookup = .shared,
-         prefs: IMEPreferences = DefaultPreferences.shared) {
+         prefs: IMEPreferences = DefaultPreferences.shared,
+         languageState: InputLanguageState = InputLanguageState()) {
         self.cinTable = cinTable ?? CINTable()
         self.pinnedStore = pinnedStore ?? PinnedStore()
         self.zhuyinLookup = zhuyinLookup
         self.prefs = prefs
+        self.languageState = languageState
         self.ranker = CandidateRanker(prefs: prefs)
         CommaCommandRunner.reload()
     }
@@ -46,7 +49,7 @@ final class InputEngine {
     private var _composing = ""
     private var _currentCandidates: [String] = []
     private var _isWildcard = false
-    private var _isEnglishMode = false
+    private var _isEnglishMode: Bool { languageState.isEnglishMode }
     private var _lastCommitted = ""
     var _lastCommittedText: String { _lastCommitted }
     private var _prevCommitted = ""
@@ -369,8 +372,7 @@ final class InputEngine {
     } }
 
     func toggleEnglishMode() { sync {
-        _isEnglishMode.toggle()
-        if !_isEnglishMode { /* switching back to Chinese */ }
+        languageState.toggle()
         _resetComposing()
         delegate?.engineDidShowToast(_currentModeLabel)
     } }

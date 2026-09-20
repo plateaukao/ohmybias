@@ -2,6 +2,13 @@
 
 格式基於 [Keep a Changelog](https://keepachangelog.com/)。
 
+## [0.8.1] — 2026-09-20
+
+### 修正
+- **跨 app 共用中／英文模式** — 每個 client 的引擎直接讀取同一份語言狀態，避免僅在啟用時複製模式而留下過期值；新建 client 也立即繼承目前選擇。啟用與停用時清除 Shift 手勢狀態，避免跨視窗延續單擊判斷。
+- **建置工具鏈配對** — 建置與測試明確透過 `xcrun --sdk macosx` 選取編譯器及 SDK，避免混用 Command Line Tools 與 Xcode 的不同版本。
+- **新版 pkgbuild 相容性** — 當分析結果省略 `BundleIsRelocatable` 時明確新增為 false，維持固定安裝位置並避免打包中斷。
+
 ## [0.8.0] — 2026-08-29
 
 ### 變更

@@ -94,6 +94,35 @@ func testRealToggleEnglish() {
     check(!engine.isEnglishMode, "Chinese after second toggle")
 }
 
+func testSharedInputLanguage() {
+    let language = InputLanguageState()
+    let first = InputEngine(languageState: language)
+    let second = InputEngine(languageState: language)
+    let firstDelegate = MockEngineDelegate()
+    let secondDelegate = MockEngineDelegate()
+    first.delegate = firstDelegate
+    second.delegate = secondDelegate
+
+    first.handleLetter("a")
+    check(second.composing.isEmpty, "不同 client 的組字不共用")
+    first.toggleEnglishMode()
+    check(first.composing.isEmpty, "切換語言清除目前 client 的組字")
+    check(second.isEnglishMode, "既有 client 不需重新啟用即可讀到英文模式")
+    checkEqual(second.currentModeLabel, "A", "模式標籤同步")
+    check(secondDelegate.toasts.isEmpty, "背景 client 不顯示切換提示")
+
+    let third = InputEngine(languageState: language)
+    check(third.isEnglishMode, "新 client 繼承英文模式")
+    second.toggleEnglishMode()
+    check(!first.isEnglishMode && !third.isEnglishMode, "另一 client 切回中文後全部同步")
+    first.handleEscape()
+    second.clearCandidates()
+    check(!third.isEnglishMode, "session 清理不改變共用模式")
+    third.toggleEnglishMode()
+    check(first.isEnglishMode && second.isEnglishMode, "新 client 也能切換共用模式")
+    check(!InputEngine().isEnglishMode, "未共用的引擎仍維持獨立預設值")
+}
+
 func testRealComposing() {
     let engine = InputEngine()
     let mock = MockEngineDelegate()
@@ -538,6 +567,7 @@ testMockDelegateReset()
 testMockDelegateMultipleCalls()
 testRealEngineInit()
 testRealToggleEnglish()
+testSharedInputLanguage()
 testRealComposing()
 testRealBackspace()
 testRealEscape()
